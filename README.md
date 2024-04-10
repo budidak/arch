@@ -36,6 +36,7 @@ cryptsetup config /dev/nvme0n1p2 --label LUKS
 cryptsetup open /dev/nvme0n1p2 enc # opens the encrypted partition with a name "enc"
 mkfs.btrfs -L ROOT /dev/mapper/enc
 BTRFS_OPTS="rw,noatime,compress=zstd:3,ssd,discard=async"
+EFI_OPTS="uid=0,gid=0,fmask=0077,dmask=0077"
 mount -o $BTRFS_OPTS /dev/mapper/enc /mnt
 btrfs subvolume create /mnt/@
 btrfs su cr /mnt/@home
@@ -45,7 +46,7 @@ mount -o $BTRFS_OPTS,subvol=@ /dev/mapper/enc /mnt
 mkdir /mnt/{boot,home,.snapshots}
 mount -o $BTRFS_OPTS,subvol=@home /dev/mapper/enc /mnt/home
 mount -o $BTRFS_OPTS,subvol=@snapshots /dev/mapper/enc /mnt/.snapshots
-mount /dev/nvme0n1p1 /mnt/boot
+mount -o $EFI_OPTS /dev/nvme0n1p1 /mnt/boot
 
 # 3. Installation of base system
 pacman -Sy neovim
@@ -150,8 +151,8 @@ nvim /boot/loader/loader.conf
 nvim /boot/loader/entries/arch.conf
   # title Arch Linux
   # linux /vmlinuz-linux
-  # /amd-ucode.img
-  # /initramfs-linux.img
+  # initrd /amd-ucode.img
+  # initrd /initramfs-linux.img
   # options root=UUID=$ROOT_UUID rw rootflags=subvol=@ loglevel=3 quiet cryptdevice=UUID=$LUKS_UUID:enc
 
 # 6. Generating the initramfs image.
@@ -178,7 +179,8 @@ reboot
 - bluez bluez-utils blueman
 - cups cups-pdf cups-filters
 - zip unzip
-- htop tmux wireshark-qt
+- btop (htop) 
+- tmux wireshark-qt
 - noto-fonts ttf-font-awesome
 - firefox ffmpeg ffmpeg4.4
 - rsync rclone timeshift
@@ -198,7 +200,7 @@ reboot
 - polkit-kde-agent
 - hyprland hypridle hyprlock hyprlang
 - xdg-desktop-portal-hyprland
-- wofi
+- fuzzel (bemenu,wofi)
 - kitty
 
 ### Other packages
