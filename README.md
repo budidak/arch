@@ -9,12 +9,12 @@ loadkeys trq # load your keymaps.
 # Plug the ethernet cable, it connects to a wired network automatically. If you don't have one, you need to connect to a wifi network:
 ip a # look for the interface name (e.g. wlan0, wpl2s0...)
 rfkill unblock wifi
-ip link set <interface> up
+ip link set ´interface´ up
 
 iwctl
   > device list
-  > station <interface> get-networks
-  > station <interface> connect <ssid>
+  > station ´interface´ get-networks
+  > station ´interface´ connect ´ssid´
 
 ip  # check if your interface gets an ip
 ping 127.0.0.1  # ping localhost
@@ -27,13 +27,13 @@ gdisk /dev/nvme0n1
   # gpt table
   # /dev/nvme0n1p1  --  1G                       EFI (ef00)
   # /dev/nvme0n1p2  --  100% of remaining space  LUKS (8309)
+
 modprobe dm-crypt
 modprobe dm-mod
 mkfs.fat -F 32 -n ESP /dev/nvme0n1p1
 cryptsetup luksFormat -v -s 512 -h sha512 /dev/nvme0n1p2
 cryptsetup config /dev/nvme0n1p2 --label LUKS
 cryptsetup open /dev/nvme0n1p2 enc # opens the encrypted partition with a name "enc"
-
 mkfs.btrfs -L ROOT /dev/mapper/enc
 BTRFS_OPTS="rw,noatime,compress=zstd:3,ssd,discard=async"
 mount -o $BTRFS_OPTS /dev/mapper/enc /mnt
@@ -101,9 +101,9 @@ nvim /etc/pacman.conf
 
 passwd # define root password
 
-useradd -m -g users -G wheel -s /bin/bash <username>
-passwd <username>  # define user password
-usermod -aG storage,power,audio <username>
+useradd -m -g users -G wheel -s /bin/bash ´username´
+passwd ´username´  # define user password
+usermod -aG storage,power,audio ´username´
 
 export EDITOR=nvim
 visudo  # edit sudoers file
@@ -111,7 +111,7 @@ visudo  # edit sudoers file
 
 # Auto login (optional)
 nvim /etc/runit/sv/agetty-tty1/conf
-  # GETTY_ARGS="--noclear --autologin <username>"
+  # GETTY_ARGS="--noclear --autologin ´username´"
 
 nvim /etc/mkinitcpio.conf
   # HOOKS=(...block encrypt lvm2 filesystems)
