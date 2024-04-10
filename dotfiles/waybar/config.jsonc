@@ -1,0 +1,186 @@
+// -*- mode: jsonc -*-
+[
+  {
+    "layer": "top",
+    "position": "top",
+    "mode": "dock",
+    "height": 0,
+    "exclusive": true,
+    "passthrough": false,
+    "gtk-layer-shell": true,
+    "margin-top": 2,
+    "margin-left": 10,
+    "margin-right": 10,
+    "spacing": 3,
+    "reload_style_on_change": true,
+    "modules-left": [
+      "keyboard-state",
+      "custom/calculator",
+      "hyprland/window"
+    ],
+    "modules-center": [
+      "wlr/taskbar",
+      "hyprland/workspaces",
+      "tray"
+    ],
+    "modules-right": [
+      "wireplumber",
+      "backlight",
+      "network",
+      "bluetooth",
+      "idle_inhibitor",
+      "battery",
+      "clock"
+    ],
+    "hyprland/workspaces":{
+      "persistent-workspaces": {
+        "*": 5
+      },
+      "on-click": "activate",
+      "active-only": false,
+      "all-outputs": true
+    },
+    "hyprland/window": {
+      "format": "👉 {title}",
+      "rewrite": {
+        "(.*) — Mozilla Firefox": "🌎 $1",
+        "(.*) — kitty": "  $1"
+      },
+      "separate-outputs": true
+    },
+    "wlr/taskbar": {
+      "format": "{icon}",
+      "icon-size": 18,
+      "tooltip-format": "{title}",
+      "on-click": "activate",
+      "on-click-middle": "close",
+      "ignore-list": ["kitty"],
+      "app_ids-mapping": {
+	"firefoxdeveloperedition": "firefox-developer-edition"
+      },
+      "rewrite": {
+        "Firefox Web Browser": "Firefox",
+	"Foot Server": "Terminal"
+      }
+    },
+    "keyboard-state": {
+      "numlock": true,
+      "capslock": true,
+      "format": {
+	"numlock": "NumLock {icon}",
+	"capslock": "CapsLock {icon}",
+      },
+      "format-icons": {
+        "locked": "",
+        "unlocked": ""
+      }
+    },
+    "clock": {
+      "format": "{:%H:%M}  ",
+      "tooltip": true,
+      "interval": 60,
+      "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+    "backlight": {
+      "format": "{percent}% {icon}",
+      "format-icons": ["",""],
+      "on-scroll-up": "~/.config/scripts/brightness.sh --screenUp",
+      "on-scroll-down": "~/.config/scripts/brightness.sh --screenDown",
+      "tooltip": false
+    },
+    "wireplumber": {
+      "format": "{volume}% {icon}",
+      "format-muted": "",
+      "format-icons": ["", "", ""],
+      "on-scroll-up": "~/.config/scripts/audio.sh --speakerUp",
+      "on-scroll-down": "~/.config/scripts/audio.sh --speakerDown",
+      "on-click": "~/.config/scripts/audio.sh --speakerToggle",
+      "tooltip": false
+    },
+    "battery": {
+      "interval": 60,
+      "states": {
+        "warning": 30,
+        "critical": 15
+      },
+      "format": "{capacity}% {icon}",
+      "format-charging": "{capacity}% ",
+      "format-plugged": "{capacity}% ",
+      "format-icons": ["", "", "", "", ""],
+      "tooltip": true,
+      "tooltip-format": "{timeTo}"
+    },
+    "network": {
+      "format": "{ifname}",
+      "format-wifi": "",
+      "format-ethernet": "",
+      "format-linked": "(No IP) ",
+      "format-disconnected": "⚠",
+      "tooltip-format": "{ifname} via {gwaddr} \n{essid} ({signalStrength}%) ",
+      "tooltip-format-disconnected": "Disconnected ⚠"
+    },
+    "bluetooth": {
+      "format": "",
+      "on-click": "blueman-manager",
+      "interval": 30,
+      "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+      "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+      "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+      "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%"
+      // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
+    },
+    "idle_inhibitor": {
+      "format": "{icon}",
+      "format-icons": {
+        "activated": "",
+        "deactivated": ""
+      },
+      "on-click-right": "hyprlock"
+    },
+    "tray": {
+      "icon-size": 18,
+      "spacing": 5
+    },
+    "custom/calculator": {
+      "format": " ",
+      "on-click": "qalculate-gtk",
+      "tooltip": false
+    },
+    "power-profiles-daemon": {
+      "format": "{icon}",
+      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+      "tooltip": true,
+      "format-icons": {
+        "default": "",
+        "performance": "",
+        "balanced": "",
+        "power-saver": ""
+      }
+    }
+  },
+  {
+    "layer": "top",
+    "position": "top",
+    "mode": "dock",
+    "height": 0,
+    "exclusive": true,
+    "passthrough": false,
+    "gtk-layer-shell": true,
+    "margin-top": 2,
+    "margin-left": 10,
+    "margin-right": 10,
+    "spacing": 3,
+    "reload_style_on_change": true,
+    "mpris": {
+      "format": "{player_icon} {dynamic}",
+      "format-paused": "{status_icon} <i>{dynamic}</i>",
+      "player-icons": {
+        "default": "▶",
+        "mpv": "🎵"
+      },
+      "status-icons": {
+        "paused": "⏸"
+      }
+    }
+  }
+]

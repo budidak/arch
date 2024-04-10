@@ -1,0 +1,90 @@
+* {
+  font-family: FontAwesome, Roboto, sans-serif;
+  font-size: 12px;
+}
+
+window#waybar {
+  background: transparent;
+  color: #fff;
+}
+
+tooltip {
+  background: rgba(43, 48, 59, 0.5);
+  border: 1px solid rgba(100, 114, 125, 0.5);
+}
+
+tooltip label {
+  color: white;
+}
+
+#clock,
+#battery,
+#wireplumber,
+#network,
+#bluetooth,
+#backlight,
+#tray,
+#mpris,
+#idle_inhibitor,
+#custom-calculator,
+#keyboard-state {
+  background: rgba(52, 44, 112, 0.8);
+  padding: 0 8px;
+  border-radius: 1000px;
+}
+
+#tray > .passive {
+  background: rgba(43,48,59,0.5);
+}
+
+#tray > .needs-attention {
+  background: rgba(52,44,112,1);
+}
+
+#idle_inhibitor.activated {
+  background: rgba(52,44,112,1);
+}
+
+#battery.charging, 
+#battery.plugged {
+  background: rgba(32, 64, 142, 0.8);
+}
+
+@keyframes blink {
+  to {
+    background-color: #ffffff;
+    color: #000000;
+  }
+}
+
+#battery.critical:not(.charging) {
+  background: rgba(182, 64, 64, 0.8);
+  animation-name: blink;
+  animation-duration: 0.5s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+#wireplumber.muted,
+#network.disconnected {
+  background: rgba(43,48,59,0.5);  
+}
+
+#workspaces button {
+  background: rgba(52, 44, 112, 0.5);
+  color: #fff;
+  margin: 0 1px;
+  border: none;
+}
+
+#workspaces button:hover {
+  background: rgba(52, 44, 112, 0.5);
+  border: none;
+} 
+
+#workspaces button.active {
+  background: rgba(52, 44, 112, 1);
+  color: #fff;
+  border: none;
+}
