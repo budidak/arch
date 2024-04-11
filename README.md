@@ -169,24 +169,29 @@ reboot
 ### Common packages you might want to install.
 
 - cmake gcc git go rustup nodejs python typescript npm yarn python-pip code curl wget
-- nvidia nvidia-utils nvidia-settings
 - man-pages man-db texinfo
 - systemd-resolvconf wireguard-tools ufw openssh
-- pipewire pipewire-alsa pipewire-pulse wireplumber 
-- brightnessctl gammastep
-- slurp grim cliphist
-- thunar thunar-volman thunar-archive-plugin thunar-media-tags-plugin gvfs lf tree
+- pipewire pipewire-alsa pipewire-pulse wireplumber
+- acpi acpi_call acpid tlp
+- slurp grim wl-clipboard (cliphist)
+- sway swaybg swayidle swaylock swayimg wlroots foot mako wf-recorder  wlsunset wmenu kanshi fuzzel playerctl polkit xorg-xwayland xdg-desktop-portal-wlr
+- pciutils usbutils sysfsutils inetutils net-tools device-mapper efibootmgr os-prober btop
+- thunar thunar-volman thunar-archive-plugin thunar-media-tags-plugin gvfs lf tree mpv firefox
 - bluez bluez-utils blueman
 - cups cups-pdf cups-filters
 - zip unzip
-- btop (htop) 
-- tmux wireshark-qt
-- noto-fonts ttf-font-awesome
-- firefox ffmpeg ffmpeg4.4
+- noto-fonts
+- ffmpeg ffmpeg4.4
 - rsync rclone timeshift
-- mpv swayimg
-- pciutils usbutils sysfsutils inetutils net-tools device-mapper efibootmgr os-prober
-- acpi acpi_call acpid tlp
+
+
+
+- nvidia nvidia-utils nvidia-settings
+- brightnessctl gammastep
+
+- tmux wireshark-qt
+- ttf-font-awesome
+
 - cronie
 - chrony
 - libqalculate qalculate-gtk
@@ -200,8 +205,6 @@ reboot
 - polkit-kde-agent
 - hyprland hypridle hyprlock hyprlang
 - xdg-desktop-portal-hyprland
-- fuzzel (bemenu,wofi)
-- kitty
 
 ### Other packages
 
@@ -292,3 +295,12 @@ sudo nvim /boot/loader/entries/arch.conf
 
 mkinitcpio -P
 ```
+
+
+
+
+SUPER + ENTER = open terminal
+SUPER SHIFT + Q = kill window
+
+sudo cp /etc/sway/config ~/.config/sway/config
+swaymsg input type:keyboard xkb_layout "tr"
