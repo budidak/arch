@@ -1,0 +1,7 @@
+SOME USEFUL COMMANDS
+--------------------
+adb shell
+pm list packages
+pm uninstall --user 0 <package>
+pm install-existing --user 0 <package>
+pm art cleanup
