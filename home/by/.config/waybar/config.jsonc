@@ -1,0 +1,255 @@
+// ------------------------------------------------------------------------------
+// WAYBAR CONFIGURATION FILE
+// FILE LOCATION : ~/.config/waybar/config.jsonc
+// REPOSITORY    : https://github.com/Alexays/Waybar
+// AUTHOR        : Burak Yeşilyurt (GITHUB: budidak)
+// DESCRIPTION   : Personal configuration for Waybar
+// DATE CREATED  : 12/01/2023
+// DATE MODIFIED : 18/08/2025
+// ------------------------------------------------------------------------------
+// MIT License
+//
+// Copyright (c) 2025 Alex
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// ------------------------------------------------------------------------------
+{
+  "layer": "top",
+  "position": "top",
+  "mode": "dock",
+  "margin": "4 8 0 8",
+  "spacing": 4,
+  "fixed-center": true,
+  "reload_style_on_change": true,
+  "modules-left": [
+    "hyprland/workspaces",
+    "wlr/taskbar",
+    "mpris"
+  ],
+  "modules-center": [
+    "clock"
+  ],
+  "modules-right": [
+    "privacy",
+    "bluetooth",
+    "network",
+    "wireplumber",
+    "backlight",
+    "group/group-power",
+    "systemd-failed-units"
+  ],
+  // MODULES
+  "hyprland/workspaces": {
+    "all-outputs": true,
+    "persistent-workspaces": {
+      "*": 3
+    },
+    "show-special": true,
+    "special-visible-only": true,
+    "on-click": "activate"
+  },
+  "wlr/taskbar": {
+    "all-outputs": true,
+    "format": "{icon}",
+    "icon-size": 24,
+    "tooltip": true,
+    "tooltip-format": "{title}",
+    "on-click": "activate",
+    "on-click-middle": "close",
+    "on-click-right": "maximize"
+  },
+  "mpris": {
+    "format": "<span color='lightgray' size='medium'>{player_icon}</span> <small>{dynamic}</small>",
+    "format-paused": "<span color='lightgray' size='medium'>{status_icon}</span> <small><i>{dynamic}</i></small>",
+    "player-icons": {
+      "default": "&#xf04c;",
+      "mpv": "&#xf87c;"
+    },
+    "status-icons": {
+      "paused": "&#xf04b;"
+    },
+    "dynamic-order": [
+      "title",
+      "length"
+    ]
+  },
+  "clock": {
+    "interval": 60,
+    "format": "<span color='lightgray' size='medium'>&#xf017;</span>   {:%H:%M}",
+    "format-alt": "<span color='lightgray' size='medium'>&#xf073;</span>   {:%A, %d-%m-%Y}",
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    "calendar": {
+      "mode": "year",
+      "mode-mon-col": 3,
+      "weeks-pos": "right",
+      "on-scroll": 1,
+      "format": {
+        "months": "<span color='#ffead3'><b>{}</b></span>",
+        "days": "<span color='#ecc6d9'><b>{}</b></span>",
+        "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+        "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+        "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
+      }
+    },
+    "actions": {
+      "on-click-right": "mode",
+      "on-scroll-up": "shift_up",
+      "on-scroll-down": "shift_down"
+    }
+  },
+  "systemd-failed-units": {
+    "hide-on-ok": true,
+    "format": "<span color='lightgray' size='medium'>&#xf071;</span>  {nr_failed}",
+    "format-ok": "<span color='lightgray' size='medium'>&#xf00c;</span>",
+    "system": true,
+    "user": true
+  },
+  "bluetooth": {
+    "format": "<span color='lightgray' size='large'>&#xf294;</span>  {status}",
+    "tooltip": true,
+    "tooltip-format": "THIS DEVICE --> {controller_address} ({controller_alias})\n# OF CONNECTIONS --> {num_connections}\n\nDEVICE --> {device_address} ({device_alias})",
+    "on-click": "~/.config/waybar/scripts/bluetooth.sh --devices",
+    "on-click-middle": "~/.config/waybar/scripts/bluetooth.sh --off",
+    "on-click-right": "~/.config/waybar/scripts/bluetooth.sh --settings"
+  },
+  "network": {
+    "interval": 10,
+    "format": "<span color='lightgray' size='medium'>{icon}</span>    {essid}",
+    "format-disconnected": "<span color='lightgray' size='medium'>{icon}</span>   No Connection",
+    "format-icons": {
+      "wifi": "&#xf1eb;",
+      "ethernet": "&#xf796;",
+      "disconnected": "&#xf127;",
+      "linked": "&#xf0c1;"
+    },
+    "tooltip-format": "<span color='lightgray' size='medium'>&#xf109;</span>  {ipaddr}\n<span color='lightgray' size='medium'>&#xf093;</span>   {bandwidthUpBits}      <span color='lightgray' size='medium'>&#xf019;</span>   {bandwidthDownBits}",
+    "tooltip-format-disconnected": "",
+    "on-click": "~/.config/waybar/scripts/network.sh --connect",
+    "on-click-middle": "~/.config/waybar/scripts/network.sh --unconnect",
+    "on-click-right": "~/.config/waybar/scripts/network.sh --vpn"
+  },
+  "wireplumber": {
+    "format": "<span color='lightgray' size='medium'>{icon}</span>{volume}%",
+    "format-muted": "<span color='white' size='medium'>&#x1f507;</span>  0%",
+    "format-icons": [
+      "&#xf026; ",
+      "&#xf027; ",
+      "&#xf028;  "
+    ],
+    "on-scroll-up": "~/.config/waybar/scripts/sound.sh --up",
+    "on-scroll-down": "~/.config/waybar/scripts/sound.sh --down",
+    "on-click": "~/.config/waybar/scripts/sound.sh --toggle",
+    "tooltip-format": "Sound level"
+  },
+  "backlight": {
+    "format": "<span color='lightgray' size='medium'>{icon}</span>   {percent}%",
+    "format-icons": [
+      "&#xf186;",
+      "&#xf185;"
+    ],
+    "on-click": "~/.config/waybar/scripts/brightness.sh --toggle",
+    "on-scroll-up": "~/.config/waybar/scripts/brightness.sh --up",
+    "on-scroll-down": "~/.config/waybar/scripts/brightness.sh --down",
+    "tooltip-format": "Brightness level"
+  },
+  "battery": {
+    "interval": 60,
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "<span color='lightgray' size='medium'>{icon}</span>   {capacity}%",
+    "format-time": "{H} hour(s) {M} minute(s)",
+    "format-icons": [
+      "&#xf244;",
+      "&#xf243;",
+      "&#xf242;",
+      "&#xf241;",
+      "&#xf240;"
+    ],
+    "format-charging": "<span color='lightgreen' size='medium'>&#xf1e6;</span>   {capacity}%",
+    "format-plugged": "<span color='lightgreen' size='medium'>&#xf1e6;</span>   {capacity}%",
+    "on-scroll-down": "",
+    "on-scroll-up": ""
+  },
+  "custom/lock": {
+    "format": "<span color='lightgray' size='medium'>&#xf023;</span>",
+    "tooltip-format": "Lock session",
+    "on-click": "hyprlock"
+  },
+  "custom/power": {
+    "format": "<span color='lightgray' size='large'>&#xf011;</span>",
+    "tooltip-format": "Power off",
+    "on-click": "shutdown now"
+  },
+  "custom/reboot": {
+    "format": "<span color='lightgray' size='medium'>&#xf021;</span>",
+    "tooltip-format": "Reboot",
+    "on-click": "reboot"
+  },
+  "custom/sleep": {
+    "format": "<span color='lightgray' size='medium'>&#xf186;</span>",
+    "tooltip-format": "Sleep",
+    "on-click": "loginctl lock-session && sleep 3 && hyprctl dispatch dpms off && sleep 3 && systemctl suspend"
+  },
+  "custom/quit": {
+    "format": "<span color='lightgray' size='medium'>&#xf08b;</span>",
+    "tooltip-format": "Sign out",
+    "on-click": "hyprctl dispatch exit"
+  },
+  "group/group-power": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 500,
+      "children-class": "not-power",
+      "transition-left-to-right": false
+    },
+    "modules": [
+      "battery",
+      "custom/sleep",
+      "custom/reboot",
+      "custom/power",
+      "custom/lock",
+      "custom/quit"
+    ]
+  },
+  "privacy": {
+    "icon-spacing": 4,
+    "icon-size": 18,
+    "transition-duration": 250,
+    "modules": [
+      {
+        "type": "screenshare",
+        "tooltip": true,
+        "tooltip-icon-size": 24
+      },
+      {
+        "type": "audio-out",
+        "tooltip": true,
+        "tooltip-icon-size": 24
+      },
+      {
+        "type": "audio-in",
+        "tooltip": true,
+        "tooltip-icon-size": 24
+      }
+    ],
+    "ignore-monitor": true
+  }
+}

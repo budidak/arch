@@ -1,0 +1,13 @@
+[Unit]
+Description=NFS Share
+After=network-online.target
+Wants=network-online.target
+
+[Mount]
+What=192.168.1.209:/srv/nfs_share
+Where=/mnt/nfs_share
+Type=nfs
+Options=_netdev,rw,nosuid,soft,intr,nfsvers=4,proto=tcp
+
+[Install]
+WantedBy=multi-user.target

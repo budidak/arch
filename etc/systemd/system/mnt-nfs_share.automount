@@ -1,0 +1,11 @@
+[Unit]
+Description=Automount NFS Share
+After=network-online.target
+Wants=network-online.target
+
+[Automount]
+Where=/mnt/nfs_share
+TimeoutIdleSec=60
+
+[Install]
+WantedBy=multi-user.target
