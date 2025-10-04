@@ -334,6 +334,19 @@ umount -R /mnt
 # reboot the machine
 reboot
 
+# Terminal recording tool:
+# pacman -S asciinema
+asciinema record <name.cast>  # start recording (ends with ^D or exit command)
+asciinema play <name.cast> # play a recording
+
+# Download a theme you like from github:
+# https://github.com/adi1090x/plymouth-themes/releases 
+# Then extract the archive content:
+tar -xzf <theme.tar.gz>
+sudo cp -R <theme_dir/> /usr/share/plymouth/themes/
+sudo plymouth-set-default-theme -l # list available themes
+sudo plymouth-set-default-theme -R <theme_name> # set default theme by editing /etc/plymouth/plymouthd.conf file.
+
 # I added/edited following files so far:
 # etc/
 #     -- mkinitcpio.conf.d/
