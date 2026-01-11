@@ -532,7 +532,7 @@ crun --version
 podman --version
 podman-compose --version
 
-run0 pacman -S pnpm bun
+run0 pacman -S pnpm bun npm unzip
 
 run pacman -S nginx  # server
 nginx -version
