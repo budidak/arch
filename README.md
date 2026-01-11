@@ -19,21 +19,29 @@ Then boot the live environment from USB.
 ## Installation
 
 ```sh
-# Load your keyboard for setup.
+# Load keyboard.
 loadkeys trq
+
+# Set font.
+setfont ter-922b
+
 # List block devices including info about filesystems.
 lsblk -f
+
 # Erase all magic strings on specified block device.
-# `/dev/sd?` for hdd & sata ssd devices
-# `/dev/nvme?` for nvme ssd devices
 wipefs -a /dev/?
+
+# Format ssd.
+nvme format /dev/? --ses=1
 ```
 
 Many laptops have a hardware button (or switch) to turn off the wireless card; however, the card can also be blocked by the kernel.
 This can be handled by rfkill(8). To show the current status:
 
 ```sh
-rfkill  # Tool for enabling and disabling wireless devices.
+# Tool for enabling and disabling wireless devices.
+
+rfkill  
 # ID TYPE      DEVICE      SOFT      HARD
 #  0 bluetooth hci0   unblocked unblocked
 #  1 wlan      phy0   unblocked unblocked
@@ -60,16 +68,6 @@ While this is supported, it will limit the boot loader choice to those that supp
 
 If the system did not boot in the mode you desired (UEFI vs BIOS), refer to your motherboard's manual.
 
-> To see badsectors on the disk, perform the following test.
-
-```sh
-# check and repair a Linux filesystem BEFORE MOUNTING
-fsck -c /dev/?
-```
-
-If it just stops with a message about end of file, the drive is fine.
-This method is also way faster than badblocks even with a single pass.
-As the command does a full write, any bad sectors should also be eliminated.
 
 ### Disk Partition
 
@@ -88,25 +86,30 @@ fdisk /dev/?
 # w: write
 
 # format partitions which were just created
-mkfs.fat -F 32 --codepage=437 -n "UEFI" /dev/?
-mkfs.btrfs --csum "xxhash" -L "ROOT" /dev/?
+mkfs.fat -c -F 32 --codepage=437 -n UEFI /dev/nvme0n1p1
+mkfs.btrfs --csum xxhash -L ROOT /dev/nvme0n1p2
 
 # check fs integrity for the btrfs filesystem before mounting it.
-# /dev/nvme0n1p2 for nvme, /dev/sda2 for sata
-btrfs check /dev/?
+btrfs check /dev/nvme0n1p2
+
+# efi filesystem mount options
+EFI_OPTS="defaults,nosuid,nodev,noexec,noatime,umask=0077,fmask=0077,dmask=0077,errors=remount-ro,tz=UTC,codepage=437,iocharset=utf8,utf8"
 
 # btrfs filesystem mount options
-BTRFS_OPTS="defaults,rw,noatime,compress=lzo,ssd,discard=async"
+BTRFS_OPTS="defaults,noatime,ssd,discard=async,space_cache=v2,compress=zstd:3"
+
 # mount btrfs filesystem on /mnt directory
-mount -t btrfs -o $BTRFS_OPTS /dev/? /mnt
+mount -t btrfs -o $BTRFS_OPTS /dev/nvme0n1p2 /mnt
 
 # create subvolumes on the mounted btrfs filesystem
 btrfs subvolume create /mnt/@
-btrfs subvolume create /mnt/@home
-btrfs subvolume create /mnt/@snapshots
+btrfs su cr /mnt/@home
+btrfs su cr /mnt/@snapshots
 btrfs su cr /mnt/@srv
 btrfs su cr /mnt/@var
 btrfs su cr /mnt/@opt
+btrfs su cr /mnt/@tmp
+
 # list defined subvolumes on /mnt directory
 btrfs su list /mnt
 
@@ -114,27 +117,25 @@ btrfs su list /mnt
 umount /mnt
 
 # mount the btrfs filesystem again, mounting @ subvolume on /mnt this time.
-mount -t btrfs -o $BTRFS_OPTS,subvol=@ /dev/? /mnt
+mount -t btrfs -o $BTRFS_OPTS,subvol=@ /dev/nvme0n1p2 /mnt
 
 # create directories for the subvolumes
-mkdir -p /mnt/{boot,home,.snapshots,srv,var,opt}
+mkdir -p /mnt/{boot,home,.snapshots,srv,var,opt,tmp}
 
 # mount subvolumes on matching directories
-mount -t btrfs -o $BTRFS_OPTS,subvol=@home /dev/? /mnt/home
-mount -t btrfs -o $BTRFS_OPTS,subvol=@snapshots /dev/? /mnt/.snapshots
-mount -t btrfs -o $BTRFS_OPTS,subvol=@srv /dev/? /mnt/srv
-mount -t btrfs -o $BTRFS_OPTS,subvol=@var /dev/? /mnt/var
-mount -t btrfs -o $BTRFS_OPTS,subvol=@opt /dev/? /mnt/opt
+mount -t btrfs -o $BTRFS_OPTS,subvol=@home /dev/nvme0n1p2 /mnt/home
+mount -t btrfs -o $BTRFS_OPTS,subvol=@snapshots /dev/nvme0n1p2 /mnt/.snapshots
+mount -t btrfs -o $BTRFS_OPTS,subvol=@srv /dev/nvme0n1p2 /mnt/srv
+mount -t btrfs -o $BTRFS_OPTS,subvol=@var /dev/nvme0n1p2 /mnt/var
+mount -t btrfs -o $BTRFS_OPTS,subvol=@opt /dev/nvme0n1p2 /mnt/opt
+mount -t btrfs -o $BTRFS_OPTS,subvol=@tmp /dev/nvme0n1p2 /mnt/tmp
 
 # start a new scrub on the btrfs filesystem, /dev/nvme0n1p2
 btrfs scrub start /dev/?
 btrfs scrub status /dev/?
 
-# efi filesystem mount options
-EFI_OPTS="defaults,noatime,usefree,codepage=437,iocharset=utf8,utf8"
 # mount boot partition on /mnt/boot directory
-# /dev/nvme0n1p1 for nvme, /dev/sda1 for sata
-mount -t vfat -o $EFI_OPTS /dev/? /mnt/boot
+mount -t vfat -o $EFI_OPTS /dev/nvme0n1p1 /mnt/boot
 ```
 
 ### Connect to an Internet
@@ -146,14 +147,19 @@ iwctl
 # station <device> scan
 # station <device> get-networks
 # station <device> connect <ssid>
-# ---> Enter password for the selected network
+#  -> Enter password for the selected network
 # exit
 
 # check if the device has an assigned IP address
 ip a
+
 # You should be able to ping a remote server if you connected successfully.
-ping archlinux.org
-# query or change system time and date settings
+ping -c 3 8.8.8.8
+
+# Check if your DNS resolves correctly.
+ping -c 3 archlinux.org
+
+# You should sync your time to be able to download packages.
 timedatectl
 ```
 
@@ -162,10 +168,12 @@ timedatectl
 ```sh
 # edit pacman related settings, enable/disable repositories.
 vim /etc/pacman.conf
-# Edit your mirrors.
+
+# Edit your mirrors. (You can use "reflector" to automate this)
 vim /etc/pacman.d/mirrorlist
+
 # Force sync repositories.
-pacman -Syyu
+pacman -Syy
 
 # ASUS TUFA15 FA507XI LAPTOP:
 # CPU: AMD Ryzen9 7940HS w/ AMD Radeon 780M iGPU
@@ -180,7 +188,9 @@ pacstrap -K /mnt base base-devel \
                  linux-firmware-amdgpu \
                  linux-firmware-nvidia \
                  linux-firmware-mediatek \
-                 polkit iwd neovim
+                 polkit iwd neovim \
+                 --assume-installed=sudo
+                 
 # If you don't want to install `sudo` you can bypass it with:
 # pacman -S <packages> --assume-installed=<packages>
 # pacstrap -K /mnt <packages> --assume-installed=sudo
@@ -202,13 +212,16 @@ nvim /etc/pacman.conf
 pacman -Syyu
 
 # Install the packages you need.
-pacman -S btrfs-progs curl wget efibootmgr plymouth pacman-contrib cronie
+# wget   -> curl
+# cronie -> systemd timers
+pacman -S btrfs-progs efibootmgr pacman-contrib curl plymouth
 pacman -S texinfo less man-db man-pages bc tree
-pacman -S noto-fonts noto-fonts-emoji ttf-hack ttf-hack-nerd
+pacman -S noto-fonts noto-fonts-emoji ttf-hack ttf-hack-nerd terminus-font
 pacman -S pciutils usbutils inetutils dmidecode inxi
 
 # Create a symbolic link for timezone information.
 ln -sf /usr/share/zoneinfo/Europe/Istanbul /etc/localtime
+
 # Sync your hardware clock.
 hwclock --systohc
 
@@ -230,6 +243,7 @@ nvim /etc/locale.conf
 # Add your keymap into this file. This is needed for tty sessions.
 nvim /etc/vconsole.conf
   # KEYMAP=trq
+  # FONT=ter-922b
 
 # Edit /etc/hostname
 # The name you write into this file defines your device's name on the network.
@@ -296,7 +310,7 @@ nvim /etc/mkinitcpio.conf
   # MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
   # BINARIES=()
   # FILES=()
-  # HOOKS=(base udev autodetect microcode modconf kms plymouth keyboard keymap consolefont numlock block btrfs filesystems resume shutdown sleep fsck)
+  # HOOKS=(base udev systemd autodetect microcode modconf kms plymouth keyboard keymap consolefont sd-vconsole numlock block btrfs filesystems resume shutdown sleep fsck)
   # COMPRESSION="zstd"
   # COMPRESSION_OPTIONS=(-v -5 --long -T0)
   # MODULES_DECOMPRESS="yes"
@@ -400,9 +414,11 @@ run0 systemctl start systemd-resolved
 run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
 # Adjust power management, and start its services.
-run0 pacman -Syu tlp smartmontools ethtool
+run0 pacman -Syu tlp
 run0 systemctl enable tlp
 run0 tlp start
+
+(not installed => smartmontools, ethtool, sof-firmware, alsa-firmware, sof-tools, yt-dlp)
 
 # Sound and media sessions configuration
 run0 pacman -Syu pipewire pipewire-jack pipewire-alsa pipewire-pulse pipewire-audio wireplumber
@@ -413,10 +429,6 @@ systemctl start pipewire --user
 systemctl start wireplumber --user
 systemctl start pipewire-pulse --user
 
-# run0 pacman -S sof-firmware
-# run0 pacman -S alsa-firmware
-# run0 pacman -S sof-tools
-
 # INSTALL ESSENTIAL PACKAGES
 run0 pacman -S foot                  # terminal
 run0 pacman -S fnott libnotify       # notifier
@@ -426,13 +438,9 @@ run0 pacman -S btop                  # process viewer
 run0 pacman -S brightnessctl         # screen brightness utility
 run0 pacman -S slurp grim swappy     # screenshot utilities
 run0 pacman -S wl-clipboard cliphist # clipboard utilities
+run0 pacman -S impala                # tui network manager
 run0 pacman -S ly                    # greeter
-run0 pacman -S nfs-utils             # nfs for network file sharing
-run0 pacman -S samba                 # samba for network file sharing
-run0 pacman -S poppler poppler-glib  # pdf rendering library
 run0 pacman -S bluez blueman bluez-utils bluez-obex # bluetooth utilities
-run0 pacman -S rsync    # sync between 2 machines
-run0 pacman -S rclone   # sync with cloud provider
 run0 pacman -S wireguard-tools openvpn # needed for vpn connection
 run0 pacman -S eza      # alternative for `ls`
 run0 pacman -S procs    # alternative for `ps`
@@ -441,18 +449,27 @@ run0 pacman -S ripgrep  # alternative for `grep`
 run0 pacman -S bat      # alternative for `cat`
 run0 pacman -S fd       # alternative for `find`
 run0 pacman -S diskus   # alternative for `du -sf`
-run0 pacman -S nushell  # alternative for `bash`
 run0 pacman -S fzf  # command line fuzzy finder
 run0 pacman -S jq   # command line json processor
-run0 pacman -S htmlq  # command line html processor
-run0 pacman -S hexyl  # command line hex viewer
 run0 pacman -S exiv2  # image metadata manipulation tool
+run0 pacman -S mpv
+run0 pacman -S ffmpeg
+
+systemctl enable bluetooth
+systemctl enable ly@tty2.service
+
+run0 pacman -S hexyl  # command line hex viewer
+run0 pacman -S htmlq  # command line html processor
+run0 pacman -S nushell  # alternative for `bash`
 run0 pacman -S gnome-calculator
-run0 pacman -S mpv yt-dlp # media player (vlc alternative)
+run0 pacman -S nfs-utils             # nfs for network file sharing
+run0 pacman -S samba                 # samba for network file sharing
+run0 pacman -S poppler poppler-glib  # pdf rendering library
+run0 pacman -S rsync    # sync between 2 machines
+run0 pacman -S rclone   # sync with cloud provider
 
 # Other tools that might be useful
-run0 pacman -S imagemagick chafa # imv? ueberzugpp?
-run0 pacman -S ffmpeg
+run0 pacman -S imagemagick # chafa # imv? ueberzugpp?
 run0 pacman -S qemu-full # hardware acceleration for emulators
 # run0 pacman -S tectonic # required to render LaTeX math expressions
 # run0 pacman -S openslide
@@ -473,7 +490,7 @@ bat cache --build
 fc-cache -f -v
 
 # INSTALL FILESYSTEMS
-run0 pacman -S ntfs-3g exfatprogs e2fsprogs
+run0 pacman -S ntfs-3g exfatprogs     # e2fsprogs
 run0 pacman -S gvfs-mtp gvfs-smb gvfs # needed when connecting android with mtp
 
 # INSTALL COMPRESSION ARCHIVING TOOLS
@@ -487,7 +504,7 @@ run0 pacman -S clang gcc
 clang --version
 gcc --version
 
-run0 pacman -S rustup rust-analyzer
+run0 pacman -S rustup # rust-analyzer
 rustup default stable
 cargo --version
 rustc --version
@@ -495,7 +512,7 @@ rustup update
 cargo install rustlings
 # cargo install ast-grep ??
 
-run0 pacman -S go gopls delve go-tools gofumpt
+run0 pacman -S go  # gopls delve go-tools gofumpt
 go version
 go telemetry off
 
@@ -515,17 +532,12 @@ crun --version
 podman --version
 podman-compose --version
 
-run0 pacman -S nodejs deno npm yarn pnpm
-deno --version
-node --version
-npm --version
-yarn --version
-pnpm --version
+run0 pacman -S pnpm bun
 
 run pacman -S nginx  # server
 nginx -version
 
-run0 pacman -S sqlite postgresql mariadb # sqlfluff?
+run0 pacman -S sqlite postgresql # mariadb # sqlfluff?
 sqlite3 --version
 postgresql --version
 mariab --version
@@ -533,18 +545,6 @@ mariab --version
 run0 pacman -S lua lua-language-server stylua # luarocks?
 lua -v
 stylua --version
-
-# run0 pacman -S ruby
-# ruby --version
-#
-# run0 pacman -S php composer
-# php --version
-#
-# run0 pacman -S cpanminus # package manager for `perl`
-# cpanm --version
-#
-# run0 pacman -S julia
-# julia --version
 #
 # run0 pacman -S zig
 # zig --version
@@ -557,19 +557,13 @@ git clone https://github.com/LazyVim/starter ~/.config/nvim
 rm -rf ~/.config/nvim/.git
 nvim
 
-# Neovim providers????
-# gem install neovim
-# run0 pacman -Syu python-neovim
-# run0 npm install -g neovim
-# run0 cpanm Neovim::Ext --force
+pacman -Syu tmux
 
 # CREATE A VIRTUAL ENVIRONMENT in ~ FOR PYTHON MODULES (to isolate from system packages)
 cd ~
 python -m venv venv
 source venv/bin/activate
 (venv) uv install debugpy
-(venv) pip install debugpy
-(venv) pip install --upgrade pip
 
 # CONFIGURE GITHUB AND SSH
 mkdir ~/.ssh
@@ -597,16 +591,15 @@ run0 pacman -S hyprland hypridle hyprcursor hyprpaper hyprlock \
                xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
 
 # HYPRLAND PLUGINS INSTALL
-run0 pacman -S make meson cpio glaze
+run0 pacman -S make meson cpio  # glaze
 hyprpm update
 hyprpm add https://github.com/hyprwm/hyprland-plugins
 # Enable plugins with the command: `hyprpm enable <plugin-name>`
 hyprpm enable hyprexpo
-hyprpm enable hyprbars
 
 # GPU TOOLS
-run0 pacman -Syu nvidia-open-dkms nvidia-utils nvidia-settings \
-                 nvtop libva-nvidia-driver libvdpau libvdpau-va-gl
+run0 pacman -Syu nvidia-open nvidia-utils nvidia-settings \
+                 libva-nvidia-driver libvdpau # libvdpau-va-gl nvtop
 # If you don't want nvidia:
 run0 pacman -Syu mesa mesa-utils glu vulkan-radeon vulkan-tools vulkan-mesa-layers vulkan-icd-loader libvdpau-va-gl
 
