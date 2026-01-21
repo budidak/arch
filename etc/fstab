@@ -3,23 +3,25 @@
 
 # <file system> <dir> <type> <options> <dump> <pass>
 # /dev/nvme0n1p2 LABEL=ROOT
-UUID=<ROOT_UUID>    /              btrfs    rw,noatime,compress=lzo,ssd,discard=async,space_cache=v2,subvol=/@                                             0 0
+UUID=<ROOT_UUID>    /              btrfs    rw,noatime,compress=zstd:3,ssd,discard=async,space_cache=v2,subvol=/@                                                                  0 0
 
 # /dev/nvme0n1p2 LABEL=ROOT
-UUID=<ROOT_UUID>    /home          btrfs    rw,noatime,compress=lzo,ssd,discard=async,space_cache=v2,subvol=/@home                                         0 0
+UUID=<ROOT_UUID>    /home          btrfs    rw,noatime,compress=zstd:3,ssd,discard=async,space_cache=v2,subvol=/@home                                                              0 0
 
 # /dev/nvme0n1p2 LABEL=ROOT
-UUID=<ROOT_UUID>    /.snapshots    btrfs    rw,noatime,compress=lzo,ssd,discard=async,space_cache=v2,subvol=/@snapshots                                    0 0
+UUID=<ROOT_UUID>    /.snapshots    btrfs    rw,noatime,compress=zstd:3,ssd,discard=async,space_cache=v2,subvol=/@snapshots                                                         0 0
 
 # /dev/nvme0n1p2 LABEL=ROOT
-UUID=<ROOT_UUID>    /srv           btrfs    rw,noatime,compress=lzo,ssd,discard=async,space_cache=v2,subvol=/@srv                                          0 0
+UUID=<ROOT_UUID>    /srv           btrfs    rw,noatime,compress=zstd:3,ssd,discard=async,space_cache=v2,subvol=/@srv                                                               0 0
 
 # /dev/nvme0n1p2 LABEL=ROOT
-UUID=<ROOT_UUID>    /var           btrfs    rw,noatime,compress=lzo,ssd,discard=async,space_cache=v2,subvol=/@var                                          0 0
+UUID=<ROOT_UUID>    /var           btrfs    rw,noatime,compress=zstd:3,ssd,discard=async,space_cache=v2,subvol=/@var                                                               0 0
 
 # /dev/nvme0n1p2 LABEL=ROOT
-UUID=<ROOT_UUID>    /opt           btrfs    rw,noatime,compress=lzo,ssd,discard=async,space_cache=v2,subvol=/@opt                                          0 0
+UUID=<ROOT_UUID>    /opt           btrfs    rw,noatime,compress=zstd:3,ssd,discard=async,space_cache=v2,subvol=/@opt                                                               0 0
+
+# /dev/nvme0n1p2 LABEL=ROOT
+UUID=<ROOT_UUID>  	/tmp      	   btrfs    rw,noexec,noatime,compress=zstd:3,ssd,discard=async,space_cache=v2,subvol=/@tmp	                                                       0 0
 
 # /dev/nvme0n1p1 LABEL=UEFI
-UUID=<EFI_UUID>     /boot          vfat     rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=utf8,shortname=mixed,usefree,utf8,errors=remount-ro    0 2
-
+UUID=<EFI_UUID>     /boot          vfat     rw,nosuid,nodev,noexec,noatime,fmask=0077,dmask=0077,codepage=437,iocharset=iso8859-1,shortname=mixed,utf8,tz=UTC,errors=remount-ro    0 2

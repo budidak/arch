@@ -26,7 +26,7 @@
 --italic-text=always
 
 # Alias for '--decorations=always --color=always'.
---force-colorization
+# --force-colorization
 
 # Specify when to use the pager (*auto*, never, always).
 --paging=auto
