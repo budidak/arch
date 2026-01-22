@@ -427,6 +427,46 @@ run0 pacman -Syu tlp
 run0 systemctl enable tlp
 run0 tlp start
 
+-------------------------------------------------------
+
+# DISABLE NVIDIA and NOUVEAU discrete GPUs
+# 1. create an efistub entry withoud nvidia parameters.
+# 2. remove nvidia related packages from system (linux-firmware-nvidia, libva-nvidia-driver nvidia-open nvidia-utils)
+# 3. blacklist nvidia and nouveau drivers in /etc/modprobe.d/blacklist-nvidia.conf = This blocks loading these modules.
+# 4. edit your /etc/mkinitcpio.conf file and remove nvidia related MODULES.
+# 5. regenerate "initramfs" file by running: mkinitcpio -P
+# 6. reboot the machine
+# 7. check the status of nvidia cards:
+
+# See the GPUs on the machine (even they are not loaded)
+# $ lspci | grep -E "VGA|3D|Display" 
+01:00.0 VGA compatible controller: NVIDIA Corporation AD106M [GeForce RTX 4070 Max-Q / Mobile] (rev a1)
+65:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Phoenix1 (rev c1)
+
+# Now you know the pci ID of the card (01:00.0 for nvidia here)
+# $ cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
+# if this command returns "active" your nvidia card still consuming power even it is not loaded.
+
+# $ cat /sys/bus/pci/devices/0000:01:00.0/power/control ---> this can be on|auto
+# we should set this to "auto" to sleep our nvidia card. (stop consuming power)
+# $ echo auto | sudo tee /sys/bus/pci/devices/0000:01:00.0/power/control
+
+# Now we should see it is suspended indeed.
+# $ cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
+# suspended
+
+# You can also see the loaded modules:
+# $ lsmod | grep -E "nvidia|nouveau"
+# nvidia_wmi_ec_backlight    12288  0
+# video                  81920  4 nvidia_wmi_ec_backlight,asus_wmi,amdgpu,asus_nb_wmi
+# wmi                    32768  4 video,nvidia_wmi_ec_backlight,asus_wmi,wmi_bmof
+
+# nvidia_wmi_ec_backlight does not mean your "nvidia|nouveau" modules are loaded! Seeing this is fine.
+# if nvidia was active you would see: nvidia nvidia_modeset nvidia_uvm nvidia_drm
+# if nouveau was active you would see: nouveau ttm drm_kms_helper
+
+---------------------------------------------------------------
+
 (not installed => smartmontools, ethtool, sof-firmware, alsa-firmware, sof-tools, yt-dlp)
 
 # Sound and media sessions configuration
