@@ -467,6 +467,48 @@ run0 tlp start
 
 ---------------------------------------------------------------
 
+1. Apps / Games
+   ↓
+2. Graphics APIs (OpenGL / Vulkan)
+  Vulkan: Video graphics API
+  Who provides Vulkan?
+    AMD → RADV (Mesa)
+    Intel → ANV (Mesa)
+    NVIDIA → nvidia proprietary Vulkan driver
+   ↓
+3. User-space drivers (Mesa, NVIDIA)
+  Mesa: implements OpenGL, Vulkan, EGL, GLX.
+        it needs a kernel driver.
+  Nvidia: does not use mesa. Replaces everything for NVIDIA GPUs.
+        best performance. best vulkan support. required for CUDA.
+   ↓
+4. Kernel drivers (amdgpu, nouveau, nvidia)
+   ↓
+5. GPU hardware
+
+
+# DRIVERS needed for iGPU (amd radeon 780M)
+# linux-firmware-amdgpu ✅
+# linux-firmware-radeon ❌ (legacy gpus only)
+# amd-ucode ✅
+# mesa        ✅ contains radeonsi + VA + VDPAU backends
+# libva       ✅ VA-API loader
+# libvdpau    ✅ VDPAU loader
+# mesa-amber  ❌ legacy OpenGL
+# libglvnd  ✅ REQUIRED (installed)
+# libepoxy  ✅ Required by many apps
+# vulkan-icd-loader ✅ REQUIRED
+# vulkan-radeon     ✅ REQUIRED (RADV)
+# mesa-utils              (glxinfo)
+# vulkan-tools            (vulkaninfo)
+# libva-intel-driver      ❌ Intel only
+# libva-nvidia-driver    ❌ NVIDIA only
+# libvdpau-va-gl          ❌ fallback/translation layer
+# libva-utils ✅ (provides "vainfo")
+# vdpauinfo   ✅ (provides "vdpauinfo")
+
+
+
 (not installed => smartmontools, ethtool, sof-firmware, alsa-firmware, sof-tools, yt-dlp)
 
 # Sound and media sessions configuration
