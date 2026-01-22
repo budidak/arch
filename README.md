@@ -329,17 +329,7 @@ mkinitcpio -P
 efibootmgr --unicode   # List all efistub entries.
 efibootmgr -b 0000 -B  # Delete the record labeled with 0000. (Delete all unneccessary entries 0000, 0001, 0002...)
 
-# Create a new efistub entry (nvidia included)
-efibootmgr --create \
-           --disk /dev/nvme0n1 \
-           --part 1 \
-           --label "Arch Linux" \
-           --loader "\vmlinuz-linux" \
-           --unicode "root=UUID=$ROOT_UUID rw rootflags=subvol=@ loglevel=3 quiet splash \
-                      nvidia-drm.modeset=1 nvidia-drm.fbdev=1 NVreg_PreserveVideoMemoryAllocations=1 \
-                      initrd=\amd-ucode.img initrd=\initramfs-linux.img"
-
-# Efistub entry (iGPU only)
+# Efistub entry
 efibootmgr --create \
            --disk /dev/nvme0n1 \
            --part 1 \
@@ -427,7 +417,64 @@ run0 pacman -Syu tlp
 run0 systemctl enable tlp
 run0 tlp start
 
--------------------------------------------------------
+
+---------------------------------------------------------------
+
+1. Apps / Games
+   ↓
+2. Graphics APIs (OpenGL / Vulkan)
+  Vulkan: Video graphics API
+  Who provides Vulkan?
+    AMD → RADV (Mesa)
+    Intel → ANV (Mesa)
+    NVIDIA → nvidia proprietary Vulkan driver
+   ↓
+3. User-space drivers (Mesa, NVIDIA)
+  AMD iGPU için MESA zorunlu.
+  Mesa: implements OpenGL, Vulkan, EGL, GLX.
+        it needs a kernel driver.
+        Mesa sürücüsü "radv" = vulkan (AMD)
+                      "radeonsi" = opengl (AMD)
+                      "iris" = intel
+                      "nouveau" = nvidia
+  Nvidia: does not use mesa. Replaces everything for NVIDIA GPUs.
+        best performance. best vulkan support. required for CUDA.
+   ↓
+4. Kernel drivers (amdgpu, nouveau, nvidia)
+   ↓
+5. GPU hardware
+
+
+# DRIVERS needed for iGPU (amd radeon 780M)
+# linux-firmware-amdgpu ✅
+# amd-ucode             ✅
+# mesa                  ✅ contains radeonsi + VA + VDPAU backends
+# vulkan-icd-loader     ✅ Ortak yükleyici zorunlu
+# vulkan-radeon         ✅ AMD vulkan sürücüsü (RADV)
+# glu                   ✅ AMD OpenGL sürücüsü
+# libglvnd              ✅ REQUIRED (çoklu gpu vendor geçişi için)
+# libepoxy              ✅ Required by many apps
+# libva                 ✅ VA-API loader (video encode/decode)
+# libvdpau              ✅ VDPAU loader (va-api üzerinden çalışır)
+# libva-utils           ✅ vainfo
+# vdpauinfo             ✅ vdpauinfo
+# mesa-utils            ✅ glxinfo
+# vulkan-tools          ✅ vulkaninfo
+# vulkan-mesa-imlicit-layers ✅ gerekli (vulkan loader tarafından otomatik yüklenir)
+
+# libva-nvidia-driver
+# linux-firmware-nvidia
+# nvidia-open
+# nvidia-utils
+
+# linux-firmware-radeon   ❌ (legacy gpus only)
+# mesa-amber              ❌ legacy OpenGL
+# libva-intel-driver      ❌ Intel only
+# libva-nvidia-driver     ❌ NVIDIA only
+# libvdpau-va-gl          ❌ fallback/translation layer
+# vulkan-mesa-layers      ❌ gerekli değil (debug için kullanılır, uygulama isterse yüklenir)
+# mangohud                ❌ oyunlarda gerekli (opsiyonel)
+
 
 # DISABLE NVIDIA and NOUVEAU discrete GPUs
 # 1. create an efistub entry withoud nvidia parameters.
@@ -465,48 +512,11 @@ run0 tlp start
 # if nvidia was active you would see: nvidia nvidia_modeset nvidia_uvm nvidia_drm
 # if nouveau was active you would see: nouveau ttm drm_kms_helper
 
----------------------------------------------------------------
+# Test komutları
+# glxinfo -B
+# vkcube
 
-1. Apps / Games
-   ↓
-2. Graphics APIs (OpenGL / Vulkan)
-  Vulkan: Video graphics API
-  Who provides Vulkan?
-    AMD → RADV (Mesa)
-    Intel → ANV (Mesa)
-    NVIDIA → nvidia proprietary Vulkan driver
-   ↓
-3. User-space drivers (Mesa, NVIDIA)
-  Mesa: implements OpenGL, Vulkan, EGL, GLX.
-        it needs a kernel driver.
-  Nvidia: does not use mesa. Replaces everything for NVIDIA GPUs.
-        best performance. best vulkan support. required for CUDA.
-   ↓
-4. Kernel drivers (amdgpu, nouveau, nvidia)
-   ↓
-5. GPU hardware
-
-
-# DRIVERS needed for iGPU (amd radeon 780M)
-# linux-firmware-amdgpu ✅
-# linux-firmware-radeon ❌ (legacy gpus only)
-# amd-ucode ✅
-# mesa        ✅ contains radeonsi + VA + VDPAU backends
-# libva       ✅ VA-API loader
-# libvdpau    ✅ VDPAU loader
-# mesa-amber  ❌ legacy OpenGL
-# libglvnd  ✅ REQUIRED (installed)
-# libepoxy  ✅ Required by many apps
-# vulkan-icd-loader ✅ REQUIRED
-# vulkan-radeon     ✅ REQUIRED (RADV)
-# mesa-utils              (glxinfo)
-# vulkan-tools            (vulkaninfo)
-# libva-intel-driver      ❌ Intel only
-# libva-nvidia-driver    ❌ NVIDIA only
-# libvdpau-va-gl          ❌ fallback/translation layer
-# libva-utils ✅ (provides "vainfo")
-# vdpauinfo   ✅ (provides "vdpauinfo")
-
+------------------------------------------------------------------------
 
 
 (not installed => smartmontools, ethtool, sof-firmware, alsa-firmware, sof-tools, yt-dlp)
