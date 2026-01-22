@@ -329,7 +329,7 @@ mkinitcpio -P
 efibootmgr --unicode   # List all efistub entries.
 efibootmgr -b 0000 -B  # Delete the record labeled with 0000. (Delete all unneccessary entries 0000, 0001, 0002...)
 
-# Create a new efistub entry.
+# Create a new efistub entry (nvidia included)
 efibootmgr --create \
            --disk /dev/nvme0n1 \
            --part 1 \
@@ -337,6 +337,15 @@ efibootmgr --create \
            --loader "\vmlinuz-linux" \
            --unicode "root=UUID=$ROOT_UUID rw rootflags=subvol=@ loglevel=3 quiet splash \
                       nvidia-drm.modeset=1 nvidia-drm.fbdev=1 NVreg_PreserveVideoMemoryAllocations=1 \
+                      initrd=\amd-ucode.img initrd=\initramfs-linux.img"
+
+# Efistub entry (iGPU only)
+efibootmgr --create \
+           --disk /dev/nvme0n1 \
+           --part 1 \
+           --label "Arch Linux" \
+           --loader "\vmlinuz-linux" \
+           --unicode "root=UUID=$ROOT_UUID rw rootflags=subvol=@ loglevel=3 quiet splash \
                       initrd=\amd-ucode.img initrd=\initramfs-linux.img"
 
 # exit the chrooted environment
