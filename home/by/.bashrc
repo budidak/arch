@@ -56,12 +56,21 @@ alias pss="procs"
 alias rgrep="rg -p"
 alias rmorph="run0 pacman -Runsv $(pacman -Qtdq)"
 alias tree="tree --dirsfirst -F"
-alias v="nvim"
+alias n="nvim"
 alias watchBattery="run0 watch -n1 tlp-stat -b"
 alias watchCpu="watch -n 1 'cat /proc/cpuinfo | grep -i 'mhz''"
 alias watchGpu="watch -n 1 nvidia-smi"
-alias sleepTimeGpu="cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_suspended_time"
+alias sleepTimeNvidia="cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_suspended_time"
+alias isActiveNvidia="cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status"
+
+alias nvidia-run='env __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json'
+# nvidia-run mpv --hwdec=nvdec <video_name>
+# nvidia-run vkcube
+# Fakat aşağıdakinde 4k video açayım prime offload yapılsın diye bekleyemezsin:
+# nvidia-run firefox
 
 ### EXECUTIONS ###
 ##################
 printInfo # Runs terminal greeter
+
+source /home/by/.config/broot/launcher/bash/br
