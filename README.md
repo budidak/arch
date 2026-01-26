@@ -307,7 +307,7 @@ echo $ROOT_UUID
 # "resume, shutdown, sleep" hooks for cleanup.
 # Order of hooks matters.
 nvim /etc/mkinitcpio.conf
-  # MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+  # MODULES=()
   # BINARIES=()
   # FILES=()
   # HOOKS=(base udev systemd autodetect microcode modconf kms plymouth keyboard keymap consolefont sd-vconsole numlock block btrfs filesystems resume shutdown sleep fsck)
@@ -337,6 +337,12 @@ efibootmgr --create \
            --loader "\vmlinuz-linux" \
            --unicode "root=UUID=$ROOT_UUID rw rootflags=subvol=@ loglevel=3 quiet splash \
                       initrd=\amd-ucode.img initrd=\initramfs-linux.img"
+
+# Veya systemdboot kullanabilirsin.
+bootctl install
+# /boot dizinine dosyalar yükler.
+# /boot/loader/loader.conf içinde düzenlemeler yapacaksın.
+# /boot/loader/entries/arch.conf oluşturacaksın.
 
 # exit the chrooted environment
 exit
@@ -397,19 +403,17 @@ sudo plymouth-set-default-theme -R <theme_name> # set default theme by editing /
 ## AFTER REBOOT
 
 ```bash
-# Enable services
-run0 systemctl enable dbus
-run0 systemctl enable iwd
-run0 systemctl enable systemd-networkd
-run0 systemctl enable systemd-resolved
+run0 systemctl enable --now systemd-homed      --- şifreli dizinler için
+run0 systemctl enable --now systemd-timesyncd  --- ntf sunucusu ile senkronizasyon için
+run0 systemctl enable --now systemd-networkd   --- ethernet
+run0 systemctl enable --now systemd-resolved   --- dns
+run0 systemctl enable --now rtkit-daemon       --- ses ve multimedya için
+systemctl enable --now wireplumber --user
+systemctl enable --now pipewire --user
+systemctl enable --now pipewire-pulse --user
 
-# Start services
-run0 systemctl start dbus
-run0 systemctl start iwd
-run0 systemctl start systemd-networkd
-run0 systemctl start systemd-resolved
-
-# Create symbolic link for network connection
+timedatectl set-ntp true
+run0 systemctl enable --now iwd
 run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
 # Adjust power management, and start its services.
@@ -523,12 +527,6 @@ run0 tlp start
 
 # Sound and media sessions configuration
 run0 pacman -Syu pipewire pipewire-jack pipewire-alsa pipewire-pulse pipewire-audio wireplumber
-systemctl enable pipewire --user
-systemctl enable wireplumber --user
-systemctl enable pipewire-pulse --user
-systemctl start pipewire --user
-systemctl start wireplumber --user
-systemctl start pipewire-pulse --user
 
 # INSTALL ESSENTIAL PACKAGES
 run0 pacman -S foot                  # terminal
