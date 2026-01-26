@@ -1,18 +1,10 @@
-# Arch Linux
-
-This is a custom configuration guide for my Arch Linux setup.
+# Arch Linux From Scratch
 
 ## Pre-installation
-
-Acquire the ISO file and the respective signature.
-It is recommended to verify the image signature before use.
-You need the checksum file to compare results: sha256sums.txt or b2sums.txt
 
 ```sh
 b2sum -c b2sums.txt
 ```
-
-Then boot the live environment from USB.
 
 > Note: Arch Linux installation images do not support Secure Boot.
 
@@ -31,7 +23,7 @@ lsblk -f
 # Erase all magic strings on specified block device.
 wipefs -a /dev/?
 
-# Format ssd.
+# Format ssd. (do not use "shred" or "dd")
 nvme format /dev/? --ses=1
 ```
 
@@ -108,7 +100,6 @@ btrfs su cr /mnt/@snapshots
 btrfs su cr /mnt/@srv
 btrfs su cr /mnt/@var
 btrfs su cr /mnt/@opt
-btrfs su cr /mnt/@tmp
 
 # list defined subvolumes on /mnt directory
 btrfs su list /mnt
@@ -120,7 +111,7 @@ umount /mnt
 mount -t btrfs -o $BTRFS_OPTS,subvol=@ /dev/nvme0n1p2 /mnt
 
 # create directories for the subvolumes
-mkdir -p /mnt/{boot,home,.snapshots,srv,var,opt,tmp}
+mkdir -p /mnt/{boot,home,.snapshots,srv,var,opt}
 
 # mount subvolumes on matching directories
 mount -t btrfs -o $BTRFS_OPTS,subvol=@home /dev/nvme0n1p2 /mnt/home
@@ -128,7 +119,6 @@ mount -t btrfs -o $BTRFS_OPTS,subvol=@snapshots /dev/nvme0n1p2 /mnt/.snapshots
 mount -t btrfs -o $BTRFS_OPTS,subvol=@srv /dev/nvme0n1p2 /mnt/srv
 mount -t btrfs -o $BTRFS_OPTS,subvol=@var /dev/nvme0n1p2 /mnt/var
 mount -t btrfs -o $BTRFS_OPTS,subvol=@opt /dev/nvme0n1p2 /mnt/opt
-mount -t btrfs -o $BTRFS_OPTS,subvol=@tmp /dev/nvme0n1p2 /mnt/tmp
 
 # start a new scrub on the btrfs filesystem, /dev/nvme0n1p2
 btrfs scrub start /dev/?
@@ -214,10 +204,11 @@ pacman -Syyu
 # Install the packages you need.
 # wget   -> curl
 # cronie -> systemd timers
+# bc tree ttf-hack dmidecode inxi
 pacman -S btrfs-progs efibootmgr pacman-contrib curl plymouth
-pacman -S texinfo less man-db man-pages bc tree
-pacman -S noto-fonts noto-fonts-emoji ttf-hack ttf-hack-nerd terminus-font
-pacman -S pciutils usbutils inetutils dmidecode inxi
+pacman -S texinfo less man-db man-pages
+pacman -S noto-fonts noto-fonts-emoji ttf-hack-nerd terminus-font
+pacman -S pciutils usbutils inetutils
 
 # Create a symbolic link for timezone information.
 ln -sf /usr/share/zoneinfo/Europe/Istanbul /etc/localtime
@@ -270,6 +261,7 @@ nvim /etc/systemd/network/10-wireless.network
   # DHCP=yes
   # DNS=9.9.9.9
   # DNS=149.112.112.112
+  # Domains=~.
 
 nvim /etc/systemd/network/20-wired.network
   # [Match]
@@ -295,12 +287,7 @@ useradd -m -G wheel -s /bin/bash by
 # set a password for the user `by`
 passwd by
 
-# Save the UUID value for the root partition into ROOT_UUID
-ROOT_UUID=$(blkid -s UUID -o value /dev/nvme0n1p2)
-echo $ROOT_UUID
-
 # Edit /etc/mkinitcpio.conf
-# I added `nvidia` related modules since I use it as my primary GPU.
 # "btrfs" hook should be between "block" and "filesystems" hooks.
 # "plymouth" is needed to show nice animation when booting/shutting down the system.
 # "numlock" hook needs `mkinitcpio-numlock (AUR)` package.
@@ -329,7 +316,13 @@ mkinitcpio -P
 efibootmgr --unicode   # List all efistub entries.
 efibootmgr -b 0000 -B  # Delete the record labeled with 0000. (Delete all unneccessary entries 0000, 0001, 0002...)
 
-# Efistub entry
+# ------------------------------
+# EFISTUB
+
+# Save the UUID value for the root partition into ROOT_UUID
+ROOT_UUID=$(blkid -s UUID -o value /dev/nvme0n1p2)
+echo $ROOT_UUID
+
 efibootmgr --create \
            --disk /dev/nvme0n1 \
            --part 1 \
@@ -338,10 +331,11 @@ efibootmgr --create \
            --unicode "root=UUID=$ROOT_UUID rw rootflags=subvol=@ loglevel=3 quiet splash \
                       initrd=\amd-ucode.img initrd=\initramfs-linux.img"
 
-# Veya systemdboot kullanabilirsin.
+# ------------------------------
+# SYSTEMDBOOT
+
 bootctl install
-# /boot dizinine dosyalar yükler.
-# /boot/loader/loader.conf içinde düzenlemeler yapacaksın.
+# /boot/loader/loader.conf
 # /boot/loader/entries/arch.conf oluşturacaksın.
 
 # exit the chrooted environment
