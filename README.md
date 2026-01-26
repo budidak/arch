@@ -341,15 +341,28 @@ run0 pacman -S pipewire-alsa pipewire-jack pipewire-pulse pipewire-audio # sound
 run0 pacman -S mpv                                                       # media player
 run0 pacman -S ffmpeg                                                    # audio tools
 run0 pacman -S yt-dlp                                                    # youtube video downloader
-run0 pacman -S eza          # alternative for `ls`
-run0 pacman -S procs        # alternative for `ps`
-run0 pacman -S dust         # alternative for `du`
-run0 pacman -S ripgrep      # alternative for `grep`
-run0 pacman -S bat          # alternative for `cat`
-run0 pacman -S fd           # alternative for `find`
-run0 pacman -S diskus       # alternative for `du -sf`
-run0 pacman -S fzf          # command line fuzzy finder
-run0 pacman -S jq           # command line json processor
+run0 pacman -S eza                                                       # alternative for `ls`
+run0 pacman -S procs                                                     # alternative for `ps`
+run0 pacman -S dust                                                      # alternative for `du`
+run0 pacman -S ripgrep                                                   # alternative for `grep`
+run0 pacman -S bat                                                       # alternative for `cat`
+run0 pacman -S fd                                                        # alternative for `find`
+run0 pacman -S diskus                                                    # alternative for `du -sf`
+run0 pacman -S fzf                                                       # command line fuzzy finder
+run0 pacman -S jq                                                        # command line json processor
+run0 pacman -S man-db man-pages                                          # manual pages
+run0 pacman -S texinfo less                                              #
+run0 pacman -S ast-grep                                                  # command search tool for code files
+run0 pacman -S unzip 7zip                                                # archive tools
+run0 pacman -S gvfs gvfs-mtp gvfs-smb                                    # MTP tools (connect android to computer and share files via USB or on Network)
+run0 pacman -S sqlite postgresql                                         # database
+run0 pacman -S nginx                                                     # server
+run0 pacman -S tmux                                                      # terminal multiplexer
+run0 pacman -S git lazygit                                               # version control system & UI
+run0 pacman -S kotlin jdk-openjdk gradle                                 # gradle: package management tool (modern version of "maven")
+run0 pacman -S rustup                                                    # provides = cargo + rustc                                                    
+rustup default stable
+rustup update
 
 run0 systemctl enable ly@tty2                   # greeter
 run0 systemctl enable --now bluetooth           # bluetooth
@@ -364,7 +377,6 @@ systemctl enable --now pipewire-pulse --user    # ses ve multimedya
 # cronie -> systemd timers
 # dmidecode inxi
 pacman -S pacman-contrib curl plymouth
-pacman -S texinfo less man-db man-pages
 
 pacman -S pciutils usbutils inetutils
 
@@ -531,22 +543,8 @@ fc-cache -f -v
 
 # INSTALL FILESYSTEMS
 run0 pacman -S ntfs-3g exfatprogs     # e2fsprogs
-run0 pacman -S gvfs-mtp gvfs-smb gvfs # needed when connecting android with mtp
-
-# INSTALL COMPRESSION ARCHIVING TOOLS
-run0 pacman -S unzip 7zip
 
 # INSTALL DEVELOPMENT TOOLS
-run0 pacman -S git gitui
-git --version
-
-run0 pacman -S rustup # rust-analyzer
-rustup default stable
-cargo --version
-rustc --version
-rustup update
-cargo install rustlings
-# cargo install ast-grep ??
 
 run0 pacman -S go  # gopls delve go-tools gofumpt
 go version
@@ -557,7 +555,7 @@ run0 pacman -S python uv # python-pip => uv is better than pip
 python --version
 uv --version
 
-run0 pacman -S kotlin gradle jdk-openjdk clang gcc 
+ clang gcc 
 
 run0 pacman -S crun podman podman-compose # podman is the os alternative to docker
 crun --version
@@ -565,13 +563,6 @@ podman --version
 podman-compose --version
 
 run0 pacman -S pnpm bun unzip
-
-run pacman -S nginx  # server
-nginx -version
-
-run0 pacman -S sqlite postgresql
-sqlite3 --version
-postgresql --version
 
 run0 pacman -S lua lua-language-server stylua # luarocks?
 lua -v
@@ -587,8 +578,6 @@ cd ~
 git clone https://github.com/LazyVim/starter ~/.config/nvim
 rm -rf ~/.config/nvim/.git
 nvim
-
-pacman -Syu tmux
 
 # CREATE A VIRTUAL ENVIRONMENT in ~ FOR PYTHON MODULES (to isolate from system packages)
 cd ~
