@@ -314,15 +314,13 @@ reboot
 
 ```bash
 # SERVICES
-
-run0 systemctl enable --now systemd-timesyncd  --- ntf sunucusu ile senkronizasyon için
-timedatectl set-ntp true                       --- sync time with ntp
-run0 systemctl enable --now systemd-networkd   --- ethernet
-run0 systemctl enable --now systemd-resolved   --- dns
-run0 systemctl enable --now iwd                --- iwd daemon
-run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf  --- needed for dns
-
-run0 systemctl enable --now systemd-homed      --- şifreli dizinler için
+run0 systemctl enable --now systemd-timesyncd                        # ntp sunucusu ile senkronizasyon için
+timedatectl set-ntp true                                             # sync time with ntp
+run0 systemctl enable --now systemd-networkd                         # ethernet
+run0 systemctl enable --now systemd-resolved                         # dns
+run0 systemctl enable --now iwd                                      # iwd daemon
+run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf   # needed for dns
+run0 systemctl enable --now systemd-homed                            # şifreli dizinler için
 
 # ---------------------------------------------------------------
 # PACKAGES
@@ -340,14 +338,26 @@ run0 pacman -S ly                                                        # greet
 run0 pacman -S bluez bluetui bluez-utils bluez-obex                      # bluetooth utilities
 run0 pacman -S rtkit wireplumber pipewire                                # sound and media 
 run0 pacman -S pipewire-alsa pipewire-jack pipewire-pulse pipewire-audio # sound and media
+run0 pacman -S mpv                                                       # media player
+run0 pacman -S ffmpeg                                                    # audio tools
+run0 pacman -S yt-dlp                                                    # youtube video downloader
+run0 pacman -S eza          # alternative for `ls`
+run0 pacman -S procs        # alternative for `ps`
+run0 pacman -S dust         # alternative for `du`
+run0 pacman -S ripgrep      # alternative for `grep`
+run0 pacman -S bat          # alternative for `cat`
+run0 pacman -S fd           # alternative for `find`
+run0 pacman -S diskus       # alternative for `du -sf`
+run0 pacman -S fzf          # command line fuzzy finder
+run0 pacman -S jq           # command line json processor
 
-run0 systemctl enable ly@tty2                  --- greeter
-run0 systemctl enable --now bluetooth          --- bluetooth
+run0 systemctl enable ly@tty2                   # greeter
+run0 systemctl enable --now bluetooth           # bluetooth
 
-run0 systemctl enable --now rtkit-daemon       --- ses ve multimedya
-systemctl enable --now wireplumber --user      --- ses ve multimedya
-systemctl enable --now pipewire --user         --- ses ve multimedya
-systemctl enable --now pipewire-pulse --user   --- ses ve multimedya
+run0 systemctl enable --now rtkit-daemon        # ses ve multimedya
+systemctl enable --now wireplumber --user       # ses ve multimedya
+systemctl enable --now pipewire --user          # ses ve multimedya
+systemctl enable --now pipewire-pulse --user    # ses ve multimedya
 
 # Install the packages you need.
 # wget   -> curl
@@ -375,7 +385,6 @@ sudo plymouth-set-default-theme -R <theme_name> # set default theme by editing /
 run0 pacman -Syu tlp
 run0 systemctl enable tlp
 run0 tlp start
-
 
 
 1. Apps / Games
@@ -486,29 +495,10 @@ vulkaninfo
 
 ------------------------------------------------------------------------
 
-(not installed => smartmontools, ethtool, sof-firmware, alsa-firmware, sof-tools, yt-dlp)
+(not installed => smartmontools, ethtool, sof-firmware, alsa-firmware, sof-tools)
 
-# Sound and media sessions configuration
-run0 pacman -Syu pipewire pipewire-jack pipewire-alsa pipewire-pulse pipewire-audio wireplumber
-
-# INSTALL ESSENTIAL PACKAGES
-
-
-run0 pacman -S eza      # alternative for `ls`
-run0 pacman -S procs    # alternative for `ps`
-run0 pacman -S dust     # alternative for `du`
-run0 pacman -S ripgrep  # alternative for `grep`
-run0 pacman -S bat      # alternative for `cat`
-run0 pacman -S fd       # alternative for `find`
-run0 pacman -S diskus   # alternative for `du -sf`
-run0 pacman -S fzf      # command line fuzzy finder
-run0 pacman -S jq       # command line json processor
-
-run0 pacman -S mpv
-run0 pacman -S ffmpeg
-
-run0 pacman -S exiv2  # image metadata manipulation tool
-run0 pacman -S wireguard-tools openvpn # needed for vpn connection
+run0 pacman -S exiv2                     # image metadata manipulation tool
+run0 pacman -S wireguard-tools openvpn   # needed for vpn connection
 
 run0 pacman -S hexyl  # command line hex viewer
 run0 pacman -S nushell  # alternative for `bash`
