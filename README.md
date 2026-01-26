@@ -1,14 +1,20 @@
 # Arch Linux From Scratch
 
-## Pre-installation
+## Pre-installation Steps
+
+Check the hash values to make sure that the file is not corrupted.
 
 ```sh
 b2sum -c b2sums.txt
 ```
 
+- Install **Ventoy** to USB drive.
+- Copy the ISO file into USB drive.
+- Reboot and enter UEFI screen.
+
 > Note: Arch Linux installation images do not support Secure Boot.
 
-## Installation
+## Installation Steps
 
 ```sh
 # Load keyboard.
@@ -25,13 +31,6 @@ wipefs -a /dev/?
 
 # Format ssd. (do not use "shred" or "dd")
 nvme format /dev/? --ses=1
-```
-
-Many laptops have a hardware button (or switch) to turn off the wireless card; however, the card can also be blocked by the kernel.
-This can be handled by rfkill(8). To show the current status:
-
-```sh
-# Tool for enabling and disabling wireless devices.
 
 rfkill  
 # ID TYPE      DEVICE      SOFT      HARD
@@ -40,11 +39,12 @@ rfkill
 ```
 
 - If the card is hard-blocked, use the hardware button (switch) to unblock it.
-- If the card is not hard-blocked but soft-blocked, use the following command:
+- If the card is not hard-blocked but soft-blocked, use the **rfkill** command to unblock:
 
 ```sh
 rfkill unblock wlan0
-ip link set `interface` up
+
+ip link set <interface_name> up # wlan0, enp2s0
 ```
 
 To verify the boot mode, check the UEFI bitness:
@@ -59,7 +59,6 @@ While this is supported, it will limit the boot loader choice to those that supp
 - If it returns No such file or directory, the system may be booted in BIOS (or CSM) mode.
 
 If the system did not boot in the mode you desired (UEFI vs BIOS), refer to your motherboard's manual.
-
 
 ### Disk Partition
 
@@ -165,6 +164,10 @@ vim /etc/pacman.d/mirrorlist
 # Force sync repositories.
 pacman -Syy
 
+# If you don't want to install `sudo` you can bypass it with:
+# pacman -S <packages> --assume-installed=<packages>
+# pacstrap -K /mnt <packages> --assume-installed=sudo
+
 # ASUS TUFA15 FA507XI LAPTOP:
 # CPU: AMD Ryzen9 7940HS w/ AMD Radeon 780M iGPU
 # GPU: NVIDIA GeForce RTX 4070
@@ -174,16 +177,12 @@ pacman -Syy
 # linux-firmware-mediatek for LAN, WLAN, Bluetooth
 pacstrap -K /mnt base base-devel \
                  linux linux-headers \
-                 amd-ucode \
+                 amd-ucode btrfs-progs \
                  linux-firmware-amdgpu \
                  linux-firmware-nvidia \
                  linux-firmware-mediatek \
                  polkit iwd neovim \
                  --assume-installed=sudo
-                 
-# If you don't want to install `sudo` you can bypass it with:
-# pacman -S <packages> --assume-installed=<packages>
-# pacstrap -K /mnt <packages> --assume-installed=sudo
 
 # Generate a fstab file for the mounted filesystem.
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -201,25 +200,15 @@ nvim /etc/pacman.conf
 # Force sync the repositories
 pacman -Syyu
 
-# Install the packages you need.
-# wget   -> curl
-# cronie -> systemd timers
-# bc tree ttf-hack dmidecode inxi
-pacman -S btrfs-progs efibootmgr pacman-contrib curl plymouth
-pacman -S texinfo less man-db man-pages
-pacman -S noto-fonts noto-fonts-emoji ttf-hack-nerd terminus-font
-pacman -S pciutils usbutils inetutils
-
 # Create a symbolic link for timezone information.
 ln -sf /usr/share/zoneinfo/Europe/Istanbul /etc/localtime
 
 # Sync your hardware clock.
 hwclock --systohc
 
-# Edit /etc/locale.gen
 # Uncomment the line with a proper locale.
 nvim /etc/locale.gen
-  # en_GB.UTF-8 UTF-8
+   # en_GB.UTF-8 UTF-8
 
 # Generate locales.
 locale-gen
@@ -227,53 +216,31 @@ locale-gen
 # Edit /etc/locale.conf
 # Write the following lines into this file:
 nvim /etc/locale.conf
-  # LANG=en_GB.UTF-8
-  # LC_COLLATE=C
+   # LANG=en_GB.UTF-8
+   # LC_COLLATE=C
 
 # Edit /etc/vconsole.conf
 # Add your keymap into this file. This is needed for tty sessions.
 nvim /etc/vconsole.conf
-  # KEYMAP=trq
-  # FONT=ter-922b
+   # KEYMAP=trq
+   # FONT=ter-922b
 
 # Edit /etc/hostname
 # The name you write into this file defines your device's name on the network.
 nvim /etc/hostname
-  # arch
+   # arch
 
 # Edit /etc/hosts
 # Write the following IP addresses into this file.
 nvim /etc/hosts
-  # 127.0.0.1  localhost.localdomain  localhost
-  # ::1        localhost.localdomain  localhost
-  # 127.0.1.1  arch.localdomain       arch
+   # 127.0.0.1  localhost.localdomain  localhost
+   # ::1        localhost.localdomain  localhost
+   # 127.0.1.1  arch.localdomain       arch
 
 # Create custom files in /etc/systemd/network/ directory to be able to connect a network.
 # You can use the following configurations.
-nvim /etc/systemd/network/10-wireless.network
-  # [Match]
-  # Name=wlan0
-  #
-  # [Link]
-  # RequiredForOnline=routable
-  #
-  # [Network]
-  # DHCP=yes
-  # DNS=9.9.9.9
-  # DNS=149.112.112.112
-  # Domains=~.
-
-nvim /etc/systemd/network/20-wired.network
-  # [Match]
-  # Name=enp2s0
-  #
-  # [Link]
-  # RequiredForOnline=routable
-  #
-  # [Network]
-  # DHCP=yes
-  # DNS=9.9.9.9
-  # DNS=149.112.112.112
+nvim /etc/systemd/network/20-wireless.network
+nvim /etc/systemd/network/30-wired.network
 
 # set a password for the root user
 passwd
@@ -287,16 +254,18 @@ useradd -m -G wheel -s /bin/bash by
 # set a password for the user `by`
 passwd by
 
-# Create a new initramfs (new kernel image)
-mkinitcpio -P
+--------------------------------
 
+pacman -S efibootmgr
 # I don't need any additional bootloader since I use 1 OS on my machine.
 # With that reason I continue the installation with EFI Boot stub.
 efibootmgr --unicode   # List all efistub entries.
 efibootmgr -b 0000 -B  # Delete the record labeled with 0000. (Delete all unneccessary entries 0000, 0001, 0002...)
 
+You can use one of the following:
+
 # ------------------------------
-# EFISTUB
+# 1. EFISTUB ENTRY
 
 # Save the UUID value for the root partition into ROOT_UUID
 ROOT_UUID=$(blkid -s UUID -o value /dev/nvme0n1p2)
@@ -311,11 +280,25 @@ efibootmgr --create \
                       initrd=\amd-ucode.img initrd=\initramfs-linux.img"
 
 # ------------------------------
-# SYSTEMDBOOT
+# 2. SYSTEMDBOOT
 
 bootctl install
-# /boot/loader/loader.conf
-# /boot/loader/entries/arch.conf oluşturacaksın.
+
+nvim /boot/loader/loader.conf
+# default        arch.conf
+# timeout        3
+# console-mode   auto
+# editor         no
+
+nvim /boot/loader/entries/arch.conf
+# title     Arch Linux
+# linux     /vmlinuz-linux
+# initrd    /amd-ucode.img
+# initrd    /initramfs-linux.img
+# options   root=UUID=<write_uuid_here> rw rootflags=subvol=@ loglevel=3 quiet splash
+
+# Create a new initramfs (new kernel image)
+mkinitcpio -P
 
 # exit the chrooted environment
 exit
@@ -325,69 +308,49 @@ umount -R /mnt
 
 # reboot the machine
 reboot
-
-# Terminal recording tool:
-# pacman -S asciinema
-asciinema record <name.cast>  # start recording (ends with ^D or exit command)
-asciinema play <name.cast> # play a recording
-
-# Download a theme you like from github:
-# https://github.com/adi1090x/plymouth-themes/releases 
-# Then extract the archive content:
-tar -xzf <theme.tar.gz>
-sudo cp -R <theme_dir/> /usr/share/plymouth/themes/
-sudo plymouth-set-default-theme -l # list available themes
-sudo plymouth-set-default-theme -R <theme_name> # set default theme by editing /etc/plymouth/plymouthd.conf file.
-
-# I added/edited following files so far:
-# etc/
-#     -- mkinitcpio.conf.d/
-#         -- linux.preset
-#     -- modprobe.d/
-#         -- nvidia-pm.conf
-#         -- nvidia.conf
-#     -- pacman.d/
-#         -- mirrorlist
-#     -- plymouth/
-#         -- plymouthd.conf
-#     -- systemd/
-#         -- network/
-#             -- 10-wireless.network
-#             -- 20-wired.network
-#         -- system/
-#             -- plymouth-wait-for-animation.service
-#     -- udev/
-#         -- rules.d/
-#             -- 80-nvidia-pm.rules
-#     -- fstab
-#     -- hostname
-#     -- hosts
-#     -- locale.conf
-#     -- locale.gen
-#     -- localtime
-#     -- mkinitcpio.conf
-#     -- pacman.conf
-#     -- resolv.conf
-#     -- sudoers
-#     -- tlp.conf
-#     -- vonsole.conf
 ```
 
-## AFTER REBOOT
+## Post-Installation Steps
 
 ```bash
 run0 systemctl enable --now systemd-homed      --- şifreli dizinler için
 run0 systemctl enable --now systemd-timesyncd  --- ntf sunucusu ile senkronizasyon için
 run0 systemctl enable --now systemd-networkd   --- ethernet
 run0 systemctl enable --now systemd-resolved   --- dns
-run0 systemctl enable --now rtkit-daemon       --- ses ve multimedya için
-systemctl enable --now wireplumber --user
-systemctl enable --now pipewire --user
-systemctl enable --now pipewire-pulse --user
+run0 systemctl enable --now rtkit-daemon       --- ses ve multimedya
+systemctl enable --now wireplumber --user      --- ses ve multimedya
+systemctl enable --now pipewire --user         --- ses ve multimedya
+systemctl enable --now pipewire-pulse --user   --- ses ve multimedya
+systemctl enable --now bluetooth               --- bluetooth
+systemctl enable ly@tty2                       --- greeter
 
-timedatectl set-ntp true
-run0 systemctl enable --now iwd
-run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+timedatectl set-ntp true                       --- sync time with ntp
+run0 systemctl enable --now iwd                --- iwd daemon
+run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf  --- needed for dns
+
+---------------------------------------------------------------
+
+# Install the packages you need.
+# wget   -> curl
+# cronie -> systemd timers
+# dmidecode inxi
+pacman -S pacman-contrib curl plymouth
+pacman -S texinfo less man-db man-pages
+pacman -S noto-fonts noto-fonts-emoji ttf-hack-nerd terminus-font
+pacman -S pciutils usbutils inetutils
+
+# Terminal recording tool:
+# pacman -S asciinema
+asciinema record <name.cast>  # start recording (ends with ^D or exit command)
+asciinema play <name.cast>    # play a recording
+
+# Download a theme you like from github:
+# https://github.com/adi1090x/plymouth-themes/releases 
+# Then extract the archive content:
+tar -xzf <theme.tar.gz>
+sudo cp -R <theme_dir/> /usr/share/plymouth/themes/
+sudo plymouth-set-default-theme -l              # list available themes
+sudo plymouth-set-default-theme -R <theme_name> # set default theme by editing /etc/plymouth/plymouthd.conf file.
 
 # Adjust power management, and start its services.
 run0 pacman -Syu tlp
@@ -395,7 +358,6 @@ run0 systemctl enable tlp
 run0 tlp start
 
 
----------------------------------------------------------------
 
 1. Apps / Games
    ↓
@@ -444,6 +406,11 @@ run0 tlp start
 # nvidia-open
 # nvidia-utils
 
+# Enable NVIDIA power services if you use as primary gpu
+systemctl enable nvidia-suspend
+systemctl enable nvidia-hibernate
+systemctl enable nvidia-resume
+
 # linux-firmware-radeon   ❌ (legacy gpus only)
 # mesa-amber              ❌ legacy OpenGL
 # libva-intel-driver      ❌ Intel only
@@ -476,7 +443,8 @@ run0 tlp start
 # $ echo auto | sudo tee /sys/bus/pci/devices/0000:01:00.0/power/control
 
 # Now we should see it is suspended indeed.
-# $ cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
+cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_suspended_time
+cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
 # suspended
 
 # You can also see the loaded modules:
@@ -490,11 +458,14 @@ run0 tlp start
 # if nouveau was active you would see: nouveau ttm drm_kms_helper
 
 # Test komutları
-# glxinfo -B
-# vkcube
+glxinfo -B
+vkcube
+vdpauinfo                 # Shows details about capabilities of the GPU.
+lscpu                     # Shows details about the CPU.
+nvidia-smi                # Check the status of your NVIDIA GPU.
+vulkaninfo
 
 ------------------------------------------------------------------------
-
 
 (not installed => smartmontools, ethtool, sof-firmware, alsa-firmware, sof-tools, yt-dlp)
 
@@ -506,14 +477,14 @@ run0 pacman -S foot                  # terminal
 run0 pacman -S fnott libnotify       # notifier
 run0 pacman -S fuzzel                # app runner
 run0 pacman -S yazi                  # tui file manager
-run0 pacman -S btop                  # process viewer
+run0 pacman -S bottom                # process viewer (alternative to "btop")
 run0 pacman -S brightnessctl         # screen brightness utility
 run0 pacman -S slurp grim swappy     # screenshot utilities
 run0 pacman -S wl-clipboard cliphist # clipboard utilities
 run0 pacman -S impala                # tui network manager
 run0 pacman -S ly                    # greeter
-run0 pacman -S bluez blueman bluez-utils bluez-obex # bluetooth utilities
-run0 pacman -S wireguard-tools openvpn # needed for vpn connection
+run0 pacman -S bluez bluetui bluez-utils bluez-obex # bluetooth utilities
+
 run0 pacman -S eza      # alternative for `ls`
 run0 pacman -S procs    # alternative for `ps`
 run0 pacman -S dust     # alternative for `du`
@@ -523,15 +494,14 @@ run0 pacman -S fd       # alternative for `find`
 run0 pacman -S diskus   # alternative for `du -sf`
 run0 pacman -S fzf  # command line fuzzy finder
 run0 pacman -S jq   # command line json processor
-run0 pacman -S exiv2  # image metadata manipulation tool
+
 run0 pacman -S mpv
 run0 pacman -S ffmpeg
 
-systemctl enable bluetooth
-systemctl enable ly@tty2.service
+run0 pacman -S exiv2  # image metadata manipulation tool
+run0 pacman -S wireguard-tools openvpn # needed for vpn connection
 
 run0 pacman -S hexyl  # command line hex viewer
-run0 pacman -S htmlq  # command line html processor
 run0 pacman -S nushell  # alternative for `bash`
 run0 pacman -S gnome-calculator
 run0 pacman -S nfs-utils             # nfs for network file sharing
@@ -546,7 +516,6 @@ run0 pacman -S qemu-full # hardware acceleration for emulators
 # run0 pacman -S tectonic # required to render LaTeX math expressions
 # run0 pacman -S openslide
 # run0 pacman -S ufw # not needed since `iptables` already installed)
-# run0 pacman -S prettier markdownlint-cli2
 
 
 # THEMING
@@ -566,15 +535,11 @@ run0 pacman -S ntfs-3g exfatprogs     # e2fsprogs
 run0 pacman -S gvfs-mtp gvfs-smb gvfs # needed when connecting android with mtp
 
 # INSTALL COMPRESSION ARCHIVING TOOLS
-run0 pacman -S lzo lz4 lzop lzip zip unzip 7zip gzip bzip2 xz zstd brotli #lrzip?
+run0 pacman -S unzip 7zip
 
 # INSTALL DEVELOPMENT TOOLS
 run0 pacman -S git gitui
 git --version
-
-run0 pacman -S clang gcc
-clang --version
-gcc --version
 
 run0 pacman -S rustup # rust-analyzer
 rustup default stable
@@ -593,26 +558,21 @@ run0 pacman -S python uv # python-pip => uv is better than pip
 python --version
 uv --version
 
-run0 pacman -S jdk-openjdk # maven?
-javac --version
-
-run0 pacman -S kotlin
-kotlinc --version
+run0 pacman -S kotlin gradle jdk-openjdk clang gcc 
 
 run0 pacman -S crun podman podman-compose # podman is the os alternative to docker
 crun --version
 podman --version
 podman-compose --version
 
-run0 pacman -S pnpm bun npm unzip
+run0 pacman -S pnpm bun unzip
 
 run pacman -S nginx  # server
 nginx -version
 
-run0 pacman -S sqlite postgresql # mariadb # sqlfluff?
+run0 pacman -S sqlite postgresql
 sqlite3 --version
 postgresql --version
-mariab --version
 
 run0 pacman -S lua lua-language-server stylua # luarocks?
 lua -v
@@ -661,71 +621,6 @@ run0 pacman -S hyprland hypridle hyprcursor hyprpaper hyprlock \
                hyprland-protocols hyprpolkitagent hyprsunset \
                hyprutils hyprpicker waybar \
                xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
-
-# HYPRLAND PLUGINS INSTALL
-run0 pacman -S make meson cpio  # glaze
-hyprpm update
-hyprpm add https://github.com/hyprwm/hyprland-plugins
-# Enable plugins with the command: `hyprpm enable <plugin-name>`
-hyprpm enable hyprexpo
-
-# GPU TOOLS
-run0 pacman -Syu nvidia-open nvidia-utils nvidia-settings \
-                 libva-nvidia-driver libvdpau # libvdpau-va-gl nvtop
-# If you don't want nvidia:
-run0 pacman -Syu mesa mesa-utils glu vulkan-radeon vulkan-tools vulkan-mesa-layers vulkan-icd-loader libvdpau-va-gl
-
-# Enable NVIDIA power services
-systemctl enable nvidia-suspend
-systemctl enable nvidia-hibernate
-systemctl enable nvidia-resume
-
-# This returns 01:00.0, I see that this is the Nvidia device on my machine.
-lspci | grep -i nvidia
-# 01:00.0 VGA compatible controller: NVIDIA Corporation AD106M [GeForce RTX 4070 Max-Q / Mobile] (rev a1)
-
-# if the output time increases through time: it means nvidia is sleeping when not in use
-cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_suspended_time
-cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
-
-lspci | grep -E 'VGA|3D'  # Lists all connected GPUs.
-vdpauinfo                 # Shows details about capabilities of the GPU.
-lscpu                     # Shows details about the CPU.
-nvidia-smi                # Check the status of your NVIDIA GPU.
-# lsmod | grep nvidia
-# vulkaninfo
-
-# Blocklist nouveau modules, and allow nvidia modules.
-# See /etc/modprobe.d/ folder.
-
-# INSTALL `yay` AUR HELPER
-git clone https://aur.archlinux.org/yay.git
-cd yay
-makepkg -si
-yay -Sy brave-bin
-yay -Sy beekeeper-studio-appimage
-
-# INSTALL `paru` AUR HELPER
-run0 pacman -Syyu
-mkdir -p ~/aur
-cd ~/aur
-git clone https://aur.archlinux.org/paru.git
-cd paru
-makepkg -si
-paru --version
-paru -S brave-bin
-paru -S beekeeper-studio-appimage
-
-# SNAP INSTALL
-run0 pacman -S apparmor squashfs-tools xfsprogs autoconf-archive python-docutils
-git clone https://aur.archlinux.org/snapd.git
-cd snapd
-makepkg -si
-sudo systemctl enable --now snapd.socket
-sudo systemctl enable --now snapd.apparmor.service
-sudo ln -s /var/lib/snapd/snap /snap
-sudo snap install android-studio --classic
-sudo snap install dbeaver-ce
 
 # TAKE SNAPSHOT w/ BTRFS
 # takes snapshot (the snapshot is stored as a subvolume)
@@ -912,36 +807,3 @@ NOTE: Make sure you enable the following options:
 
 - USB DEBUGGING
 - INSTALL VIA USB
-
-### SUSPEND ISSUE == SYSTEM AUTOMATICALLY WAKES UP (not needed anymore)
-
-Check your wakeup table using `cat /proc/acpi/wakeup` and look at **GPP0**. It should say **enabled\*. Using `run0 /bin/sh -c '/bin/echo GPP0 > /proc/acpi/wakeup'` you can set it to**disabled\*. PC should suspend normally then.
-
-If it does then you can use a systemd (if you use it) service to run that command at boot.
-
-```/etc/systemd/system/disable-wakeup.service
-[Unit]
-Description=Fix for the suspend issue
-[Service]
-Type=oneshot
-ExecStart=/bin/sh -c "echo GPP0 > /proc/acpi/wakeup"
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-systemctl enable disable-wakeup.service
-systemctl start disable-wakeup.service
-```
-
-You can try to edit kernel cmd:
-
-```sh
-run0 efibootmgr --create --disk /dev/nvme0n1 --part 1 --label "Arch Linux" --loader "\vmlinuz-linux" --unicode "root=UUID=$ROOT_UUID rw loglevel=3 quiet nvidia-drm.modeset=1 initrd=\amd-ucode.img initrd=\initramfs-linux.img nvidia.NVreg_PreserveVideoMemoryAllocations=1 acpi_sleep=nonvs no_console_suspend"
-```
-
-
-```sh
-# TODO: Create localization files under /usr/share/i18n/locales/<en_US>
-# TODO:
-```
