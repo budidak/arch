@@ -287,27 +287,6 @@ useradd -m -G wheel -s /bin/bash by
 # set a password for the user `by`
 passwd by
 
-# Edit /etc/mkinitcpio.conf
-# "btrfs" hook should be between "block" and "filesystems" hooks.
-# "plymouth" is needed to show nice animation when booting/shutting down the system.
-# "numlock" hook needs `mkinitcpio-numlock (AUR)` package.
-# "resume, shutdown, sleep" hooks for cleanup.
-# Order of hooks matters.
-nvim /etc/mkinitcpio.conf
-  # MODULES=()
-  # BINARIES=()
-  # FILES=()
-  # HOOKS=(base udev systemd autodetect microcode modconf kms plymouth keyboard keymap consolefont sd-vconsole numlock block btrfs filesystems resume shutdown sleep fsck)
-  # COMPRESSION="zstd"
-  # COMPRESSION_OPTIONS=(-v -5 --long -T0)
-  # MODULES_DECOMPRESS="yes"
-
-# I removed the `fallback` from PRESETS and commented the fallback line: To prevent generation of initramfs fallback image.
-nvim /etc/mkinitcpio.conf.d/linux.preset
-  # ALL_kver="/boot/vmlinuz-linux"
-  # PRESETS=('default')
-  # default_image="/boot/initramfs-linux.img"
-
 # Create a new initramfs (new kernel image)
 mkinitcpio -P
 
