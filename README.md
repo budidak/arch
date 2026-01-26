@@ -254,7 +254,7 @@ useradd -m -G wheel -s /bin/bash by
 # set a password for the user `by`
 passwd by
 
---------------------------------
+# --------------------------------
 
 pacman -S efibootmgr
 # I don't need any additional bootloader since I use 1 OS on my machine.
@@ -313,22 +313,41 @@ reboot
 ## Post-Installation Steps
 
 ```bash
-run0 systemctl enable --now systemd-homed      --- şifreli dizinler için
+# SERVICES
+
 run0 systemctl enable --now systemd-timesyncd  --- ntf sunucusu ile senkronizasyon için
+timedatectl set-ntp true                       --- sync time with ntp
 run0 systemctl enable --now systemd-networkd   --- ethernet
 run0 systemctl enable --now systemd-resolved   --- dns
+run0 systemctl enable --now iwd                --- iwd daemon
+run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf  --- needed for dns
+
+run0 systemctl enable --now systemd-homed      --- şifreli dizinler için
+
+# ---------------------------------------------------------------
+# PACKAGES
+run0 pacman -S noto-fonts noto-fonts-emoji ttf-hack-nerd terminus-font   # fonts
+run0 pacman -S foot                                                      # terminal
+run0 pacman -S fnott libnotify                                           # notifier
+run0 pacman -S fuzzel                                                    # app runner
+run0 pacman -S yazi                                                      # tui file manager
+run0 pacman -S bottom                                                    # process viewer (alternative to "btop")
+run0 pacman -S brightnessctl                                             # screen brightness utility
+run0 pacman -S slurp grim swappy                                         # screenshot utilities
+run0 pacman -S wl-clipboard cliphist                                     # clipboard utilities
+run0 pacman -S impala                                                    # tui network manager
+run0 pacman -S ly                                                        # greeter
+run0 pacman -S bluez bluetui bluez-utils bluez-obex                      # bluetooth utilities
+run0 pacman -S rtkit wireplumber pipewire                                # sound and media 
+run0 pacman -S pipewire-alsa pipewire-jack pipewire-pulse pipewire-audio # sound and media
+
+run0 systemctl enable ly@tty2                  --- greeter
+run0 systemctl enable --now bluetooth          --- bluetooth
+
 run0 systemctl enable --now rtkit-daemon       --- ses ve multimedya
 systemctl enable --now wireplumber --user      --- ses ve multimedya
 systemctl enable --now pipewire --user         --- ses ve multimedya
 systemctl enable --now pipewire-pulse --user   --- ses ve multimedya
-systemctl enable --now bluetooth               --- bluetooth
-systemctl enable ly@tty2                       --- greeter
-
-timedatectl set-ntp true                       --- sync time with ntp
-run0 systemctl enable --now iwd                --- iwd daemon
-run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf  --- needed for dns
-
----------------------------------------------------------------
 
 # Install the packages you need.
 # wget   -> curl
@@ -336,7 +355,7 @@ run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf  --- needed f
 # dmidecode inxi
 pacman -S pacman-contrib curl plymouth
 pacman -S texinfo less man-db man-pages
-pacman -S noto-fonts noto-fonts-emoji ttf-hack-nerd terminus-font
+
 pacman -S pciutils usbutils inetutils
 
 # Terminal recording tool:
@@ -473,17 +492,7 @@ vulkaninfo
 run0 pacman -Syu pipewire pipewire-jack pipewire-alsa pipewire-pulse pipewire-audio wireplumber
 
 # INSTALL ESSENTIAL PACKAGES
-run0 pacman -S foot                  # terminal
-run0 pacman -S fnott libnotify       # notifier
-run0 pacman -S fuzzel                # app runner
-run0 pacman -S yazi                  # tui file manager
-run0 pacman -S bottom                # process viewer (alternative to "btop")
-run0 pacman -S brightnessctl         # screen brightness utility
-run0 pacman -S slurp grim swappy     # screenshot utilities
-run0 pacman -S wl-clipboard cliphist # clipboard utilities
-run0 pacman -S impala                # tui network manager
-run0 pacman -S ly                    # greeter
-run0 pacman -S bluez bluetui bluez-utils bluez-obex # bluetooth utilities
+
 
 run0 pacman -S eza      # alternative for `ls`
 run0 pacman -S procs    # alternative for `ps`
@@ -492,8 +501,8 @@ run0 pacman -S ripgrep  # alternative for `grep`
 run0 pacman -S bat      # alternative for `cat`
 run0 pacman -S fd       # alternative for `find`
 run0 pacman -S diskus   # alternative for `du -sf`
-run0 pacman -S fzf  # command line fuzzy finder
-run0 pacman -S jq   # command line json processor
+run0 pacman -S fzf      # command line fuzzy finder
+run0 pacman -S jq       # command line json processor
 
 run0 pacman -S mpv
 run0 pacman -S ffmpeg
