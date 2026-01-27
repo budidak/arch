@@ -313,23 +313,22 @@ reboot
 ## Post-Installation Steps
 
 ```bash
-# SERVICES
-run0 systemctl enable --now systemd-timesyncd                        # ntp sunucusu ile senkronizasyon için
-timedatectl set-ntp true                                             # sync time with ntp
-run0 systemctl enable --now systemd-networkd                         # ethernet
-run0 systemctl enable --now systemd-resolved                         # dns
-run0 systemctl enable --now iwd                                      # iwd daemon
-run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf   # needed for dns
-run0 systemctl enable --now systemd-homed                            # şifreli dizinler için
+# TIME & NETWORK SERVICES
+run0 systemctl enable --now systemd-timesyncd                            # ntp sunucusu ile senkronizasyon için
+timedatectl set-ntp true                                                 # sync time with ntp
+run0 systemctl enable --now systemd-networkd                             # ethernet
+run0 systemctl enable --now systemd-resolved                             # dns
+run0 systemctl enable --now iwd                                          # iwd daemon
+run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf       # needed for dns
+run0 systemctl enable --now systemd-homed                                # şifreli dizinler için
 
-# ---------------------------------------------------------------
-# PACKAGES
+# -----------------------------------------------------------------------
+# PACKAGES I USE
 run0 pacman -S noto-fonts noto-fonts-emoji ttf-hack-nerd terminus-font   # fonts
 run0 pacman -S foot                                                      # terminal
 run0 pacman -S fnott libnotify                                           # notifier
 run0 pacman -S fuzzel                                                    # app runner
 run0 pacman -S yazi                                                      # tui file manager
-run0 pacman -S bottom                                                    # process viewer (alternative to "btop")
 run0 pacman -S brightnessctl                                             # screen brightness utility
 run0 pacman -S slurp grim swappy                                         # screenshot utilities
 run0 pacman -S wl-clipboard cliphist                                     # clipboard utilities
@@ -351,39 +350,233 @@ run0 pacman -S diskus                                                    # alter
 run0 pacman -S fzf                                                       # command line fuzzy finder
 run0 pacman -S jq                                                        # command line json processor
 run0 pacman -S man-db man-pages                                          # manual pages
-run0 pacman -S texinfo less                                              #
-run0 pacman -S ast-grep                                                  # command search tool for code files
-run0 pacman -S unzip 7zip                                                # archive tools
-run0 pacman -S gvfs gvfs-mtp gvfs-smb                                    # MTP tools (connect android to computer and share files via USB or on Network)
-run0 pacman -S sqlite postgresql                                         # database
-run0 pacman -S nginx                                                     # server
-run0 pacman -S tmux                                                      # terminal multiplexer
-run0 pacman -S git lazygit                                               # version control system & UI
-run0 pacman -S kotlin jdk-openjdk gradle                                 # gradle: package management tool (modern version of "maven")
-run0 pacman -S rustup                                                    # provides = cargo + rustc                                                    
-rustup default stable
-rustup update
+run0 pacman -S texinfo less                                              # text processing tools
+run0 pacman -S unzip 7zip                                                # archive tools --- zip
+run0 pacman -S tar cpio                                                  #
+run0 pacman -S gvfs gvfs-mtp gvfs-smb                                    # MTP tools (connect android to computer with USB or with network)
 
 run0 systemctl enable ly@tty2                   # greeter
 run0 systemctl enable --now bluetooth           # bluetooth
-
 run0 systemctl enable --now rtkit-daemon        # ses ve multimedya
 systemctl enable --now wireplumber --user       # ses ve multimedya
 systemctl enable --now pipewire --user          # ses ve multimedya
 systemctl enable --now pipewire-pulse --user    # ses ve multimedya
 
+# -----------------------------------------------------------------------
+# MONITORING & DIAGNOSTIC TOOLS
+
+run0 pacman -S bottom                                                    # process viewer (alternative to "btop")
+run0 pacman -S atop                                                      # process viewer that also shows history
+run0 pacman -S iproute2 iputils inetutils ethtool dnsutils               # network tools
+run0 pacman -S nmap                                                      # port scan
+run0 pacman -S tcpdump                                                   # package capture
+run0 pacman -S iperf3                                                    # bandwidth test
+run0 pacman -S bind                                                      # tools like "dig, nslookup, nsupdate"
+run0 pacman -S util-linux                                                # tools like "lsblk, dmesg, umount"
+run0 pacman -S procps-ng                                                 # tools like "ps, top, free, vmstat"
+run0 pacman -S coreutils                                                 # tools like "df, du, stat"
+run0 pacman -S kmod                                                      # tools like "lsmod, modprobe"
+run0 pacman -S pciutils                                                  # PCI/PCIe devices
+run0 pacman -S usbutils                                                  # USB devices
+run0 pacman -S efibootmgr                                                # UEFI boot
+run0 pacman -S strace                                                    # tracing
+run0 pacman -S e2fsprogs                                                 # ext4 filesystem tools
+run0 pacman -S dmidecode inxi hwinfo lshw                                # hardware info
+run0 pacman -S smartmontools                                             # disk health (smart info)
+run0 pacman -S lm_sensors                                                # sensor data
+run0 pacman -S iotop                                                     # I/O usage of processes
+run0 pacman -S nvme-cli                                                  # NVM-Express user space tooling
+run0 pacman -S powertop                                                  # Power consumption tool for analysis
+run0 pacman -S perf                                                      # advanced diagnostic analysis kernel level
+
+# -----------------------------------------------------------------------
+# POWER CONFIGURATION
+
+# Eğer güç ayarlarını elle yapmak istersen:
+run0 pacman -S cpupower
+run0 cpupower frequency-set -g powersave                                 # use cpu governor
+run0 systemctl enable --now cpupower
+echo 0 | run0 tee /sys/devices/system/cpu/cpufreq/boost                  # disable AMD boost
+run0 iw dev wlan0 set power_save on                                      # power saver on wlan0
+run0 nvme set-feature /dev/nvme0 -f 0x0c -v 1                            # nvme power save on (ASPT if supports)
+echo auto | run0 tee /sys/bus/usb/devices/*/power/control                # autosuspend for usb devices
+cat /sys/module/pcie_aspm/parameters/policy                              # current PCIe state information
+echo powersave | run0 tee /sys/module/pcie_aspm/parameters/policy        # ASPT power save
+
+# Eğer güç ayarlarını otomatik yapmak istersen:
+run0 pacman -Syu tlp                                                     # power management tool
+run0 systemctl enable --now tlp.service
+
+# -----------------------------------------------------------------------
+# GPU CONFIGURATION
+
+How does it work?
+
+1. Apps / Games
+      ↓
+2. Graphics APIs (OpenGL / Vulkan)
+   Vulkan: Video graphics API
+   Who provides Vulkan?
+     AMD → RADV (Mesa)
+     Intel → ANV (Mesa)
+     NVIDIA → nvidia proprietary Vulkan driver
+      ↓
+3. User-space drivers (Mesa, NVIDIA)
+   AMD iGPU için MESA zorunlu.
+   Mesa: implements OpenGL, Vulkan, EGL, GLX.
+         it needs a kernel driver.
+         Mesa sürücüsü "radv" = vulkan (AMD)
+                       "radeonsi" = opengl (AMD)
+                       "iris" = intel
+                       "nouveau" = nvidia
+   Nvidia: does not use mesa. Replaces everything for NVIDIA GPUs.
+         best performance. best vulkan support. required for CUDA.
+      ↓
+4. Kernel drivers (amdgpu, nouveau, nvidia)
+      ↓
+5. GPU hardware
+
+
+# DRIVERS needed for iGPU (amd radeon 780M)
+# linux-firmware-amdgpu      ✅ official linux kernel for modern amd gpus
+# amd-ucode                  ✅ microcode (for amd cpu)
+# mesa                       ✅ contains radeonsi + VA + VDPAU backends
+# vulkan-icd-loader          ✅ Ortak yükleyici zorunlu
+# vulkan-radeon              ✅ AMD vulkan sürücüsü (RADV)
+# glu                        ✅ AMD OpenGL sürücüsü
+# libglvnd                   ✅ Required (çoklu gpu vendor geçişi için)
+# libepoxy                   ✅ Required by many apps
+# libva                      ✅ VA-API loader (video encode/decode)
+# libvdpau                   ✅ VDPAU loader (va-api üzerinden çalışır)
+# libva-utils                ✅ vainfo
+# vdpauinfo                  ✅ vdpauinfo
+# mesa-utils                 ✅ glxinfo
+# vulkan-tools               ✅ vulkaninfo
+# vulkan-mesa-imlicit-layers ✅ gerekli (vulkan loader tarafından otomatik yüklenir)
+
+# DRIVERS needed for dGPU (nvidia rtx4070)
+# linux-firmware-nvidia      ✅ official linux driver for nvidia
+# nvidia-open                ✅ nvidia open source driver
+# nvidia-utils               ✅ nvidia utilities
+# nvidia-settings            ✅ nvidia settings
+# libva-nvidia-driver        ✅ hardware acceleration for nvidia
+# nvtop                      ✅ monitoring tool for nvidia 
+
+# Enable NVIDIA power services ONLY IF YOU USE IT AS PRIMARY GPU! ⚠️
+systemctl enable nvidia-suspend
+systemctl enable nvidia-hibernate
+systemctl enable nvidia-resume
+
+# linux-firmware-radeon   ❌ legacy amd gpus
+# mesa-amber              ❌ legacy OpenGL
+# libva-intel-driver      ❌ Intel only
+# libvdpau-va-gl          ❌ fallback/translation layer for old nvidia cards
+# vulkan-mesa-layers      ❌ for debugging
+# mangohud                ❌ for gaming
+
+# DISABLE NVIDIA and NOUVEAU discrete GPUs
+# 1. remove kernel parameters (create an efistub entry withoud nvidia parameters)
+# 2. remove nvidia related packages from system (linux-firmware-nvidia, libva-nvidia-driver nvidia-open nvidia-utils)
+# 3. blacklist nvidia and nouveau drivers in /etc/modprobe.d/blacklist-nvidia.conf = This blocks loading these modules.
+# 4. edit your /etc/mkinitcpio.conf file and remove nvidia related MODULES.
+# 5. regenerate "initramfs" file by running: mkinitcpio -P
+# 6. reboot the machine
+# 7. check the status of nvidia cards:
+
+# See the GPUs on the machine (even they are not loaded)
+lspci | grep -E "VGA|3D|Display" 
+# 01:00.0 VGA compatible controller: NVIDIA Corporation AD106M [GeForce RTX 4070 Max-Q / Mobile] (rev a1)
+# 65:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Phoenix1 (rev c1)
+
+# Now you know the pci ID of the card (01:00.0 for nvidia here)
+cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
+# if this command returns "active" your nvidia card still consuming power even it is not loaded.
+
+cat /sys/bus/pci/devices/0000:01:00.0/power/control    
+# this can be on|auto
+# we should set this to "auto" to sleep our nvidia card. (stop consuming power)
+echo auto | run0 tee /sys/bus/pci/devices/0000:01:00.0/power/control
+
+# Now we should see it is suspended indeed.
+cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_suspended_time
+cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
+# suspended
+
+# You can also see the loaded modules:
+lsmod | grep -E "nvidia|nouveau"
+# nvidia_wmi_ec_backlight    12288  0
+# video                      81920  4 nvidia_wmi_ec_backlight,asus_wmi,amdgpu,asus_nb_wmi
+# wmi                        32768  4 video,nvidia_wmi_ec_backlight,asus_wmi,wmi_bmof
+
+# nvidia_wmi_ec_backlight does not mean your "nvidia|nouveau" modules are loaded! Seeing this is fine.
+# if nvidia was active you would see: nvidia nvidia_modeset nvidia_uvm nvidia_drm
+# if nouveau was active you would see: nouveau ttm drm_kms_helper
+
+# Test komutları
+glxinfo -B
+vkcube                    # for hardware acceleration test
+vdpauinfo                 # Shows details about capabilities of the GPU.
+lscpu                     # Shows details about the CPU.
+nvidia-smi                # Check the status of your NVIDIA GPU.
+vulkaninfo
+
+# ----------------------------------------------
+# DEVELOPMENT TOOLS
+
+run0 pacman -S ast-grep                         # command search tool for code files
+
+run0 pacman -S sqlite postgresql                # database  --- sqlfluff (linter + formatter)
+
+run0 pacman -S nginx                            # server
+
+run0 pacman -S tmux                             # terminal multiplexer
+
+run0 pacman -S git lazygit                      # version control system & UI (alternative 'gitui')
+
+run0 pacman -S kotlin gradle jdk-openjdk        # gradle: package management tool (modern version of "maven")
+
+run0 pacman -S rustup                           # provides = cargo + rustc  --- rust-analyzer
+rustup default stable
+rustup update
+
+run0 pacman -S go                               # go programming language --- gopls delve go-tools gofumpt
+go telemetry off
+
+run0 pacman -S python uv                        # uv: package management tool (modern version of "pip")
+                                                # debug-adapter => python-debugpy
+
+run0 pacman -S nodejs pnpm bun                  # pnpm: disk efficient package management tool
+                                                # bun: all-in-one tool
+                                                
+run0 pacman -S lua lua-language-server stylua   # luarocks?
+
+run0 pacman -S zig                              # safer alternative to C (still in early development)
+
+run0 pacman -S clang gcc meson ninja            # meson: build tool (uses 'ninja', and 'wrapdb' for package management)
+run0 pacman -S cmake                            # cmake: build tool (you need extra package managers "conan" or "vcpkg")
+run0 pacman -S glaze                            # in memory json library for C++
+
+# "Dart" gets installed with Flutter SDK, no need for seperate installation.
+run0 pacman -S clang gcc ninja cmake pkgconf gtk3       # needed for flutter
+cd ~
+git clone https://github.com/flutter/flutter.git
+flutter channel stable
+flutter doctor --disable-analytics
+flutter doctor --android-licenses
+flutter doctor -v
+flutter create <project_name>
+flutter create --description "Description here" \
+               --platforms android \
+               --org `org.budidak` \
+               --project-name `stay_fit` stay_fit
+
+run0 pacman -S crun podman podman-compose              # container tools (alternative to "docker")
+                                                       
+
 # Install the packages you need.
 # wget   -> curl
 # cronie -> systemd timers
-# dmidecode inxi
-pacman -S pacman-contrib curl plymouth
-
-pacman -S pciutils usbutils inetutils
-
-# Terminal recording tool:
-# pacman -S asciinema
-asciinema record <name.cast>  # start recording (ends with ^D or exit command)
-asciinema play <name.cast>    # play a recording
+pacman -S pacman-contrib plymouth
 
 # Download a theme you like from github:
 # https://github.com/adi1090x/plymouth-themes/releases 
@@ -393,121 +586,9 @@ sudo cp -R <theme_dir/> /usr/share/plymouth/themes/
 sudo plymouth-set-default-theme -l              # list available themes
 sudo plymouth-set-default-theme -R <theme_name> # set default theme by editing /etc/plymouth/plymouthd.conf file.
 
-# Adjust power management, and start its services.
-run0 pacman -Syu tlp
-run0 systemctl enable tlp
-run0 tlp start
-
-
-1. Apps / Games
-   ↓
-2. Graphics APIs (OpenGL / Vulkan)
-  Vulkan: Video graphics API
-  Who provides Vulkan?
-    AMD → RADV (Mesa)
-    Intel → ANV (Mesa)
-    NVIDIA → nvidia proprietary Vulkan driver
-   ↓
-3. User-space drivers (Mesa, NVIDIA)
-  AMD iGPU için MESA zorunlu.
-  Mesa: implements OpenGL, Vulkan, EGL, GLX.
-        it needs a kernel driver.
-        Mesa sürücüsü "radv" = vulkan (AMD)
-                      "radeonsi" = opengl (AMD)
-                      "iris" = intel
-                      "nouveau" = nvidia
-  Nvidia: does not use mesa. Replaces everything for NVIDIA GPUs.
-        best performance. best vulkan support. required for CUDA.
-   ↓
-4. Kernel drivers (amdgpu, nouveau, nvidia)
-   ↓
-5. GPU hardware
-
-
-# DRIVERS needed for iGPU (amd radeon 780M)
-# linux-firmware-amdgpu ✅
-# amd-ucode             ✅
-# mesa                  ✅ contains radeonsi + VA + VDPAU backends
-# vulkan-icd-loader     ✅ Ortak yükleyici zorunlu
-# vulkan-radeon         ✅ AMD vulkan sürücüsü (RADV)
-# glu                   ✅ AMD OpenGL sürücüsü
-# libglvnd              ✅ REQUIRED (çoklu gpu vendor geçişi için)
-# libepoxy              ✅ Required by many apps
-# libva                 ✅ VA-API loader (video encode/decode)
-# libvdpau              ✅ VDPAU loader (va-api üzerinden çalışır)
-# libva-utils           ✅ vainfo
-# vdpauinfo             ✅ vdpauinfo
-# mesa-utils            ✅ glxinfo
-# vulkan-tools          ✅ vulkaninfo
-# vulkan-mesa-imlicit-layers ✅ gerekli (vulkan loader tarafından otomatik yüklenir)
-
-# libva-nvidia-driver
-# linux-firmware-nvidia
-# nvidia-open
-# nvidia-utils
-
-# Enable NVIDIA power services if you use as primary gpu
-systemctl enable nvidia-suspend
-systemctl enable nvidia-hibernate
-systemctl enable nvidia-resume
-
-# linux-firmware-radeon   ❌ (legacy gpus only)
-# mesa-amber              ❌ legacy OpenGL
-# libva-intel-driver      ❌ Intel only
-# libva-nvidia-driver     ❌ NVIDIA only
-# libvdpau-va-gl          ❌ fallback/translation layer
-# vulkan-mesa-layers      ❌ gerekli değil (debug için kullanılır, uygulama isterse yüklenir)
-# mangohud                ❌ oyunlarda gerekli (opsiyonel)
-
-
-# DISABLE NVIDIA and NOUVEAU discrete GPUs
-# 1. create an efistub entry withoud nvidia parameters.
-# 2. remove nvidia related packages from system (linux-firmware-nvidia, libva-nvidia-driver nvidia-open nvidia-utils)
-# 3. blacklist nvidia and nouveau drivers in /etc/modprobe.d/blacklist-nvidia.conf = This blocks loading these modules.
-# 4. edit your /etc/mkinitcpio.conf file and remove nvidia related MODULES.
-# 5. regenerate "initramfs" file by running: mkinitcpio -P
-# 6. reboot the machine
-# 7. check the status of nvidia cards:
-
-# See the GPUs on the machine (even they are not loaded)
-# $ lspci | grep -E "VGA|3D|Display" 
-01:00.0 VGA compatible controller: NVIDIA Corporation AD106M [GeForce RTX 4070 Max-Q / Mobile] (rev a1)
-65:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Phoenix1 (rev c1)
-
-# Now you know the pci ID of the card (01:00.0 for nvidia here)
-# $ cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
-# if this command returns "active" your nvidia card still consuming power even it is not loaded.
-
-# $ cat /sys/bus/pci/devices/0000:01:00.0/power/control ---> this can be on|auto
-# we should set this to "auto" to sleep our nvidia card. (stop consuming power)
-# $ echo auto | sudo tee /sys/bus/pci/devices/0000:01:00.0/power/control
-
-# Now we should see it is suspended indeed.
-cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_suspended_time
-cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
-# suspended
-
-# You can also see the loaded modules:
-# $ lsmod | grep -E "nvidia|nouveau"
-# nvidia_wmi_ec_backlight    12288  0
-# video                  81920  4 nvidia_wmi_ec_backlight,asus_wmi,amdgpu,asus_nb_wmi
-# wmi                    32768  4 video,nvidia_wmi_ec_backlight,asus_wmi,wmi_bmof
-
-# nvidia_wmi_ec_backlight does not mean your "nvidia|nouveau" modules are loaded! Seeing this is fine.
-# if nvidia was active you would see: nvidia nvidia_modeset nvidia_uvm nvidia_drm
-# if nouveau was active you would see: nouveau ttm drm_kms_helper
-
-# Test komutları
-glxinfo -B
-vkcube
-vdpauinfo                 # Shows details about capabilities of the GPU.
-lscpu                     # Shows details about the CPU.
-nvidia-smi                # Check the status of your NVIDIA GPU.
-vulkaninfo
-
 ------------------------------------------------------------------------
 
-(not installed => smartmontools, ethtool, sof-firmware, alsa-firmware, sof-tools)
+(not installed =>  sof-firmware, alsa-firmware, sof-tools)
 
 run0 pacman -S exiv2                     # image metadata manipulation tool
 run0 pacman -S wireguard-tools openvpn   # needed for vpn connection
@@ -528,6 +609,10 @@ run0 pacman -S qemu-full # hardware acceleration for emulators
 # run0 pacman -S openslide
 # run0 pacman -S ufw # not needed since `iptables` already installed)
 
+# Terminal recording tool:
+# pacman -S asciinema
+asciinema record <name.cast>  # start recording (ends with ^D or exit command)
+asciinema play <name.cast>    # play a recording
 
 # THEMING
 ln -sf "${THEME_DIR}/gtk-4.0/assets" "${HOME}/.config/gtk-4.0/assets" &&
@@ -542,34 +627,7 @@ bat cache --build
 fc-cache -f -v
 
 # INSTALL FILESYSTEMS
-run0 pacman -S ntfs-3g exfatprogs     # e2fsprogs
-
-# INSTALL DEVELOPMENT TOOLS
-
-run0 pacman -S go  # gopls delve go-tools gofumpt
-go version
-go telemetry off
-
-run0 pacman -S python uv # python-pip => uv is better than pip
-# run0 pacman -S python-debugpy python--pudb
-python --version
-uv --version
-
- clang gcc 
-
-run0 pacman -S crun podman podman-compose # podman is the os alternative to docker
-crun --version
-podman --version
-podman-compose --version
-
-run0 pacman -S pnpm bun unzip
-
-run0 pacman -S lua lua-language-server stylua # luarocks?
-lua -v
-stylua --version
-#
-# run0 pacman -S zig
-# zig --version
+run0 pacman -S ntfs-3g exfatprogs
 
 run0 pacman -S tree-sitter tree-sitter-bash tree-sitter-c tree-sitter-cli tree-sitter-bash tree-sitter-javascript tree-sitter-lua tree-sitter-markdown tree-sitter-python tree-sitter-query tree-sitter-rust tree-sitter-vim tree-sitter-vimdoc
 
@@ -671,24 +729,6 @@ ls /run/user/1000/gvfs # 1000 for UID
 gio mount -u "mtp://Xiaomi_Xiaomi_11T_Pro_44beaf3c/"
 ```
 
-#### INSTALL FLUTTER
-
-```bash
-run0 pacman -S ninja cmake # build tools for `flutter`
-# You do not need to install "dart" package, since it's already included in Flutter SDK.
-cd ~
-git clone https://github.com/flutter/flutter.git
-which flutter
-which dart
-flutter channel stable
-flutter channel
-flutter doctor --disable-analytics
-flutter create `project_name` # this uses default settings
-
-flutter create --description "Only app you need to stay fit" --platforms android \
-               --org `org.budidak` --project-name `stay_fit` stay_fit
-```
-
 #### ANDROID SDK
 
 Download the following files and place it under **~/Android/Sdk/** (which is set as $ANDROID_HOME environment variable)
@@ -727,56 +767,8 @@ emulator @Android_36
 # Cold start emulator
 emulator @Android_36 -no-snapshot-load
 
-# (OPTIONAL)Config your emulator, reference this --> https://developer.android.com/studio/run/emulator-commandline
+# (OPTIONAL) Config your emulator, reference this --> https://developer.android.com/studio/run/emulator-commandline
 nvim ~/.android/avd/Android_36.avd/config.ini
-# PlayStore.enabled=true
-# abi.type=x86_64
-# avd.ini.displayname=Pixel 3 API 30
-# avd.ini.encoding=UTF-8
-# disk.dataPartition.size = 6442450944
-# fastboot.chosenSnapshotFile=
-# fastboot.forceChosenSnapshotBoot=no
-# fastboot.forceColdBoot=no
-# fastboot.forceFastBoot=yes
-# hw.accelerometer=yes
-# hw.arc=false
-# hw.audioInput=yes
-# hw.battery=yes
-# hw.camera.back=webcam0
-# hw.camera.front=emulated
-# hw.cpu.arch=x86_64
-# hw.cpu.ncore=4
-# hw.dPad=no
-# hw.device.hash2=MD5:8a60718609e0741c7c0cc225f49c5590
-# hw.device.manufacturer=Google
-# hw.device.name=pixel_3
-# hw.gps=yes
-# hw.gpu.enabled=yes
-# hw.gpu.mode=auto
-# hw.initialOrientation=Portrait
-# hw.keyboard=yes
-# hw.lcd.density=440
-# hw.lcd.height=2160
-# hw.lcd.width=1080
-# hw.mainKeys=no
-# hw.ramSize=1536
-# hw.sdCard=yes
-# hw.sensors.orientation=yes
-# hw.sensors.proximity=yes
-# hw.trackBall=no
-# image.sysdir.1=system-images/android-31/google_apis_playstore/x86_64/
-# runtime.network.latency=none
-# runtime.network.speed=full
-# sdcard.path=/Users/localadm/.android/avd/Pixel_3_API_30.avd/sdcard.img
-# sdcard.size=512 MB
-# showDeviceFrame=no
-# skin.dynamic=yes
-# skin.name=1080x2160
-# skin.path=_no_skin
-# skin.path.backup=_no_skin
-# tag.display=Google Play
-# tag.id=google_apis_playstore
-# vm.heapSize=256
 ```
 
 #### CONNECT YOUR PHYSICAL DEVICE (WIRELESS DEBUGGING THROUGH ADB)
