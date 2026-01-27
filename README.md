@@ -339,6 +339,7 @@ run0 pacman -S impala                                                    # tui n
 run0 pacman -S mpv                                                       # media player
 run0 pacman -S ffmpeg                                                    # audio tools
 run0 pacman -S yt-dlp                                                    # youtube video downloader
+run0 pacman -S tree                                                      # tree structure of directories
 run0 pacman -S eza                                                       # alternative for `ls`
 run0 pacman -S procs                                                     # alternative for `ps`
 run0 pacman -S dust                                                      # alternative for `du`
@@ -356,6 +357,9 @@ run0 pacman -S gvfs gvfs-mtp gvfs-smb                                    # MTP t
 run0 pacman -S poppler poppler-glib                                      # pdf rendering library
 run0 pacman -S firefox                                                   # browser
 run0 pacman -S ntfs-3g exfatprogs                                        # other filesystems
+run0 pacman -S exiv2                                                     # image metadata manipulation tool
+run0 pacman -S imagemagick
+run0 pacman -S qemu-base                                                 # hardware acceleration for emulators
 
 # -----------------------------------------------------------------------
 # CONFIGURE GITHUB AND SSH
@@ -696,14 +700,25 @@ flutter create --description "Description here" \
                --project-name `stay_fit` stay_fit
 
 run0 pacman -S crun podman podman-compose              # container tools (alternative to "docker")
+
+run0 pacman -S tree-sitter \
+               tree-sitter-bash \
+               tree-sitter-c \
+               tree-sitter-bash \
+               tree-sitter-javascript \
+               tree-sitter-lua \
+               tree-sitter-markdown \
+               tree-sitter-python \
+               tree-sitter-query \
+               tree-sitter-rust \
+               tree-sitter-vim \
+               tree-sitter-vimdoc
                                                        
 ------------------------------------------------------------------------
-
-(not installed =>  sof-firmware, alsa-firmware, sof-tools)
+⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+mikrofon çalışmıyorsa dene => sof-firmware --- alsa-firmware (eski kartlarda)
 # wget   -> curl
 # cronie -> systemd timers
-
-run0 pacman -S exiv2                     # image metadata manipulation tool
 
 run0 pacman -S hexyl  # command line hex viewer
 run0 pacman -S nushell  # alternative for `bash`
@@ -714,8 +729,8 @@ run0 pacman -S rsync    # sync between 2 machines
 run0 pacman -S rclone   # sync with cloud provider
 
 # Other tools that might be useful
-run0 pacman -S imagemagick # chafa # imv? ueberzugpp?
-run0 pacman -S qemu-full # hardware acceleration for emulators
+# chafa # imv? ueberzugpp?
+
 # run0 pacman -S tectonic # required to render LaTeX math expressions
 # run0 pacman -S openslide
 
@@ -723,8 +738,7 @@ run0 pacman -S qemu-full # hardware acceleration for emulators
 # pacman -S asciinema
 asciinema record <name.cast>  # start recording (ends with ^D or exit command)
 asciinema play <name.cast>    # play a recording
-
-run0 pacman -S tree-sitter tree-sitter-bash tree-sitter-c tree-sitter-cli tree-sitter-bash tree-sitter-javascript tree-sitter-lua tree-sitter-markdown tree-sitter-python tree-sitter-query tree-sitter-rust tree-sitter-vim tree-sitter-vimdoc
+⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
 ```
 
 ```bash
