@@ -47,8 +47,6 @@ function diff() {
 # alias cat=bat
 alias cc="run0 sync; echo 3 | run0 tee /proc/sys/vm/drop_caches" # Clear buff/cache memory (You can check with free -h)
 alias clear="clear && printInfo"
-# alias du=dust
-# alias find=fd
 alias free="free -h"
 alias histgrep="history | rg '$1'"
 alias l="eza -laxghUMmo --git --icons=auto --sort=Name --time-style='+%Y-%m-%d %H:%M'"
@@ -56,7 +54,8 @@ alias pss="procs"
 alias rgrep="rg -p"
 alias rmorph="run0 pacman -Runsv $(pacman -Qtdq)"
 alias tree="tree --dirsfirst -F"
-alias n="nvim"
+alias vim="nvim"
+alias v="nvim"
 alias watchBattery="run0 watch -n1 tlp-stat -b"
 alias watchCpu="watch -n 1 'cat /proc/cpuinfo | grep -i 'mhz''"
 alias watchGpu="watch -n 1 nvidia-smi"
@@ -69,8 +68,8 @@ alias nvidia-run='env __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvid
 # Fakat aşağıdakinde 4k video açayım prime offload yapılsın diye bekleyemezsin:
 # nvidia-run firefox
 
+# source /home/by/.config/broot/launcher/bash/br
+
 ### EXECUTIONS ###
 ##################
 printInfo # Runs terminal greeter
-
-source /home/by/.config/broot/launcher/bash/br

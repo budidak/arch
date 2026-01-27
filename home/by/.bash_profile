@@ -11,10 +11,9 @@ export BUN_INSTALL="$HOME/.bun"
 export CARGO_HOME=$HOME/.cargo
 export CARGO_TARGET_DIR=$CARGO_HOME/target
 export CGO_ENABLED=1
-export CHROME_EXECUTABLE=brave
+export CHROME_EXECUTABLE=chromium
 export EDITOR=nvim
 export FLUTTER_HOME=$HOME/flutter
-## export GEM_HOME=$HOME/.local/share/gem # not needed if you don't use Ruby
 export GOPATH=$HOME/go
 export GOROOT=/usr/lib/go
 export JAVA_HOME=/usr/lib/jvm/default
@@ -44,11 +43,7 @@ export PATH="$PATH:$ANDROID_HOME/tools/bin"
 export PATH="$PATH:$ANDROID_HOME/platform-tools"
 export PATH="$PATH:$BUN_INSTALL/bin"       # bun all-in-one package manager (alternative to npm, yarn, pnpm, deno...)
 export PATH="$PATH:$FLUTTER_HOME/bin"      # flutter and dart binaries
-export PATH="$PATH":"$HOME/.pub-cache/bin" # firebase sdk (after installed FlutterFire CLI)
 export PATH="$PATH:$PYTHON_HOME/bin"       # packages installed with `pip` inside python virtual environment
-
-### EXECUTIONS ###
-##################
-# exec Hyprland  # not necessary after installed `ly`
+export PATH="$PATH":"$HOME/.pub-cache/bin" # firebase sdk (after installed FlutterFire CLI)
 
 source /home/by/.config/broot/launcher/bash/br
