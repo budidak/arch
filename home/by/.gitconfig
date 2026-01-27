@@ -1,41 +1,41 @@
 [user]
-  name = Burak Yeşilyurt
-  email = git@budidak.org
-  signingkey = /home/by/.ssh/git.pub
+   name = Burak Yeşilyurt
+   email = git@budidak.org
+   signingkey = /home/by/.ssh/git.pub
 [gpg]
-  format = ssh
-[core]
-  editor = nvim -c 'set noswapfile' --wait
-  excludesfile = ~/.gitignore_global
-  autocrlf = input
-  safecrlf = true
+   format = ssh
 [commit]
-  gpgSign = true
-[push]
-  default = simple
-[pull]
-  rebase = false
-[color]
-  ui = auto
-[credential]
-  helper = cache --timeout=3600
-[alias]
-  st = status
-  ci = commit
-  cia = commit -a
-  br = branch
-  co = checkout
-  df = diff
-	lg = log --graph --decorate --pretty=format:'%C(yellow)%h%Creset -%C(cyan)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-[merge]
-  tool = vimdiff
-[diff]
-  tool = vimdiff
-[rebase]
-  autosquash = true
+   gpgSign = true
+[core]
+   editor = nvim -c 'set noswapfile' --wait
+   excludesfile = ~/.gitignore_global
+   autocrlf = input
+   safecrlf = true
 [init]
-  defaultBranch = main
+   defaultBranch = main
+[push]
+   default = simple
+[pull]
+   rebase = false
+[color]
+   ui = auto
+[credential]
+   helper = cache --timeout=3600
+[alias]
+   st = status
+   ci = commit
+   cia = commit -a
+   br = branch
+   co = checkout
+   df = diff
+   lg = log --graph --decorate --pretty=format:'%C(yellow)%h%Creset -%C(cyan)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+[merge]
+   tool = vimdiff
+[diff]
+   tool = vimdiff
+[rebase]
+   autosquash = true
 [filter "lfs"]
-  clean = git-lfs clean -- %f
-  smudge = git-lfs smudge -- %f
-  required = true
+   clean = git-lfs clean -- %f
+   smudge = git-lfs smudge -- %f
+   required = true
