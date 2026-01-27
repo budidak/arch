@@ -6,13 +6,13 @@
    format = ssh
 [commit]
    gpgSign = true
+[init]
+   defaultBranch = main
 [core]
    editor = nvim -c 'set noswapfile' --wait
    excludesfile = ~/.gitignore_global
    autocrlf = input
    safecrlf = true
-[init]
-   defaultBranch = main
 [push]
    default = simple
 [pull]
