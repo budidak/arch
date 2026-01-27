@@ -315,6 +315,7 @@ reboot
 ```bash
 # -----------------------------------------------------------------------
 # TIME & NETWORK SERVICES
+
 run0 systemctl enable --now systemd-timesyncd                            # ntp sunucusu ile senkronizasyon için
 timedatectl set-ntp true                                                 # sync time with ntp
 run0 systemctl enable --now systemd-networkd                             # ethernet
@@ -324,7 +325,8 @@ run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf       # neede
 run0 systemctl enable --now systemd-homed                                # şifreli dizinler için
 
 # -----------------------------------------------------------------------
-# PACKAGES I USE
+# APPS
+
 run0 pacman -S noto-fonts noto-fonts-emoji ttf-hack-nerd terminus-font   # fonts
 run0 pacman -S foot                                                      # terminal
 run0 pacman -S fnott libnotify                                           # notifier
@@ -356,6 +358,7 @@ run0 pacman -S firefox                                                   # brows
 
 # -----------------------------------------------------------------------
 # CONFIGURE GITHUB AND SSH
+
 mkdir ~/.ssh
 ssh-keygen -t ed25519 -C "your_email@example.com"
    # > Generating public/private ALGORITHM key pair.
@@ -374,16 +377,19 @@ ssh -T git@github.com
 
 # -----------------------------------------------------------------------
 # GREETER
+
 run0 pacman -S ly
 run0 systemctl enable ly@tty2
 
 # -----------------------------------------------------------------------
 # BLUETOOTH
+
 run0 pacman -S bluez bluetui bluez-utils bluez-obex
 run0 systemctl enable --now bluetooth
 
 # -----------------------------------------------------------------------
 # SOUND and MEDIA
+
 run0 pacman -S rtkit wireplumber pipewire
 run0 pacman -S pipewire-alsa pipewire-jack pipewire-pulse pipewire-audio
 
@@ -393,7 +399,24 @@ systemctl enable --now pipewire --user
 systemctl enable --now pipewire-pulse --user
 
 # -----------------------------------------------------------------------
+# HYPRLAND & WAYBAR
+
+run0 pacman -S hyprland hypridle hyprlock hyprsunset hyprpaper hyprpolkitagent \
+               hyprcursor hyprutils hyprpicker hyprland-protocols hyprpwcenter \
+               xdg-desktop-portal-hyprland xdg-desktop-portal-gtk waybar \
+               qt5-wayland qt6-wayland
+
+# -----------------------------------------------------------------------
+# LAZY VIM
+
+cd ~
+git clone https://github.com/LazyVim/starter ~/.config/nvim
+rm -rf ~/.config/nvim/.git
+nvim
+
+# -----------------------------------------------------------------------
 # ANIMATED SPLASH SCREEN
+
 run0 pacman -S plymouth
 
 # Download a theme you like from github: (I chose "LONE")
@@ -406,6 +429,7 @@ run0 plymouth-set-default-theme -R <theme_name> # set default theme by editing /
 
 # -----------------------------------------------------------------------
 # WIREGUARD CONFIGURATION
+
 run0 pacman -S wireguard-tools openvpn ufw
 systemctl enable --now ufw
 
@@ -416,6 +440,35 @@ systemctl start wg-quick@linux-vpn.service
 ufw route allow out on wlan0
 chown root:root /etc/wireguard/linux-vpn.conf
 chmod 0640 /etc/wireguard/linux-vpn.conf
+
+# -----------------------------------------------------------------------
+# TAKE SNAPSHOT with BTRFS
+
+# Ssnapshots are stored as subvolumes.
+btrfs subvolume snapshot /source /destination
+# backup (then you change related subvol or subvolid in /etc/fstab file and then reboot)
+run0 cp /etc/fstab /etc/fstab.bak
+
+btrfs filesystem usage /
+btrfs filesystem df /
+
+# -----------------------------------------------------------------------
+# PACMAN LOCK
+
+# If pacman fails to sync repository (unable to unlock db) try:
+run0 find / -name "db.lck" 2>/dev/null 
+
+# (possibly it will return '/var/lib/pacman/db.lck'
+run0 rm /var/lib/pacman/db.lck
+
+pacman -Syy
+
+# -----------------------------------------------------------------------
+# USE OF VIRTUAL ENVIRONMENT for PYTHON PROJECTS
+
+python -m venv venv
+source venv/bin/activate
+(venv) uv install debugpy
 
 # -----------------------------------------------------------------------
 # MONITORING & DIAGNOSTIC TOOLS
@@ -495,29 +548,29 @@ How does it work?
 
 
 # DRIVERS needed for iGPU (amd radeon 780M)
-# linux-firmware-amdgpu      ✅ official linux kernel for modern amd gpus
-# amd-ucode                  ✅ microcode (for amd cpu)
-# mesa                       ✅ contains radeonsi + VA + VDPAU backends
-# vulkan-icd-loader          ✅ Ortak yükleyici zorunlu
-# vulkan-radeon              ✅ AMD vulkan sürücüsü (RADV)
-# glu                        ✅ AMD OpenGL sürücüsü
-# libglvnd                   ✅ Required (çoklu gpu vendor geçişi için)
-# libepoxy                   ✅ Required by many apps
-# libva                      ✅ VA-API loader (video encode/decode)
-# libvdpau                   ✅ VDPAU loader (va-api üzerinden çalışır)
-# libva-utils                ✅ vainfo
-# vdpauinfo                  ✅ vdpauinfo
-# mesa-utils                 ✅ glxinfo
-# vulkan-tools               ✅ vulkaninfo
-# vulkan-mesa-imlicit-layers ✅ gerekli (vulkan loader tarafından otomatik yüklenir)
+# linux-firmware-amdgpu       ✅ official kernel driver for modern amd gpus
+# amd-ucode                   ✅ microcode (for amd cpu)
+# mesa                        ✅ contains radeonsi + VA + VDPAU backends
+# vulkan-icd-loader           ✅ Ortak yükleyici zorunlu
+# vulkan-radeon               ✅ AMD vulkan sürücüsü (RADV)
+# glu                         ✅ AMD OpenGL sürücüsü
+# libglvnd                    ✅ Required (çoklu gpu vendor geçişi için)
+# libepoxy                    ✅ Required by many apps
+# libva                       ✅ VA-API loader (video encode/decode)
+# libvdpau                    ✅ VDPAU loader (va-api üzerinden çalışır)
+# libva-utils                 ✅ vainfo
+# vdpauinfo                   ✅ vdpauinfo
+# mesa-utils                  ✅ glxinfo
+# vulkan-tools                ✅ vulkaninfo
+# vulkan-mesa-implicit-layers ✅ gerekli (vulkan loader tarafından otomatik yüklenir)
 
 # DRIVERS needed for dGPU (nvidia rtx4070)
-# linux-firmware-nvidia      ✅ official linux driver for nvidia
-# nvidia-open                ✅ nvidia open source driver
-# nvidia-utils               ✅ nvidia utilities
-# nvidia-settings            ✅ nvidia settings
-# libva-nvidia-driver        ✅ hardware acceleration for nvidia
-# nvtop                      ✅ monitoring tool for nvidia 
+# linux-firmware-nvidia       ✅ official kernel driver for nvidia
+# nvidia-open                 ✅ nvidia open source driver
+# nvidia-utils                ✅ nvidia utilities
+# nvidia-settings             ✅ nvidia settings
+# libva-nvidia-driver         ✅ hardware acceleration for nvidia
+# nvtop                       ✅ monitoring tool for nvidia 
 
 # Enable NVIDIA power services ONLY IF YOU USE IT AS PRIMARY GPU! ⚠️
 systemctl enable nvidia-suspend
@@ -643,7 +696,6 @@ run0 pacman -S nushell  # alternative for `bash`
 run0 pacman -S gnome-calculator
 run0 pacman -S nfs-utils             # nfs for network file sharing
 run0 pacman -S samba                 # samba for network file sharing
-
 run0 pacman -S rsync    # sync between 2 machines
 run0 pacman -S rclone   # sync with cloud provider
 
@@ -675,45 +727,6 @@ run0 pacman -S ntfs-3g exfatprogs
 
 run0 pacman -S tree-sitter tree-sitter-bash tree-sitter-c tree-sitter-cli tree-sitter-bash tree-sitter-javascript tree-sitter-lua tree-sitter-markdown tree-sitter-python tree-sitter-query tree-sitter-rust tree-sitter-vim tree-sitter-vimdoc
 
-# LAZY VIM
-cd ~
-git clone https://github.com/LazyVim/starter ~/.config/nvim
-rm -rf ~/.config/nvim/.git
-nvim
-
-# CREATE A VIRTUAL ENVIRONMENT in ~ FOR PYTHON MODULES (to isolate from system packages)
-cd ~
-python -m venv venv
-source venv/bin/activate
-(venv) uv install debugpy
-
-
-
-
-# INSTALL HYPRLAND and WAYBAR
-run0 pacman -S qt5ct qt6c
-run0 pacman -S gtk3 gtk4
-run0 pacman -S qt5-wayland qt6-wayland
-run0 pacman -S hyprland hypridle hyprcursor hyprpaper hyprlock \
-               hyprland-protocols hyprpolkitagent hyprsunset \
-               hyprutils hyprpicker waybar \
-               xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
-
-# TAKE SNAPSHOT w/ BTRFS
-# takes snapshot (the snapshot is stored as a subvolume)
-btrfs subvolume snapshot /source /destination
-# backup (then you change related subvol or subvolid in /etc/fstab file and then reboot)
-run0 cp /etc/fstab /etc/fstab.bak
-
-btrfs filesystem usage /
-btrfs filesystem df /
-
-# PACMAN LOCK
-# If pacman fails to sync repository (unable to unlock db) try:
-run0 find / -name "db.lck" 2>/dev/null 
-# (possibly it will return '/var/lib/pacman/db.lck'
-run0 rm /var/lib/pacman/db.lck
-pacman -Syy
 ```
 
 ```bash
