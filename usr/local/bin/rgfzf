@@ -36,7 +36,7 @@ export C_LBL=$'\e[1;34m' # Mavi
 SEP_LINE="──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────"
 
 # Keybinds (İkonlu)
-export KEYBINDS_STR="${C_SEP}${SEP_LINE}${C_RESET}
+export KEYBINDS_STR="${SEP_LINE}${C_RESET}
  ${C_KEY}CTRL-T${C_RESET}: 📄/📂 File/Dir │ ${C_KEY}CTRL-S${C_RESET}: 🔍 fzf/rg │ ${C_KEY}CTRL-O${C_RESET}: 🧭 Search Scope"
 
 # --- 3. Komut Mantığı ---
