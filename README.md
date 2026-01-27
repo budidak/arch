@@ -313,6 +313,7 @@ reboot
 ## Post-Installation Steps
 
 ```bash
+# -----------------------------------------------------------------------
 # TIME & NETWORK SERVICES
 run0 systemctl enable --now systemd-timesyncd                            # ntp sunucusu ile senkronizasyon için
 timedatectl set-ntp true                                                 # sync time with ntp
@@ -333,10 +334,6 @@ run0 pacman -S brightnessctl                                             # scree
 run0 pacman -S slurp grim swappy                                         # screenshot utilities
 run0 pacman -S wl-clipboard cliphist                                     # clipboard utilities
 run0 pacman -S impala                                                    # tui network manager
-run0 pacman -S ly                                                        # greeter
-run0 pacman -S bluez bluetui bluez-utils bluez-obex                      # bluetooth utilities
-run0 pacman -S rtkit wireplumber pipewire                                # sound and media 
-run0 pacman -S pipewire-alsa pipewire-jack pipewire-pulse pipewire-audio # sound and media
 run0 pacman -S mpv                                                       # media player
 run0 pacman -S ffmpeg                                                    # audio tools
 run0 pacman -S yt-dlp                                                    # youtube video downloader
@@ -354,23 +351,77 @@ run0 pacman -S texinfo less                                              # text 
 run0 pacman -S unzip 7zip                                                # archive tools --- zip
 run0 pacman -S tar cpio                                                  #
 run0 pacman -S gvfs gvfs-mtp gvfs-smb                                    # MTP tools (connect android to computer with USB or with network)
+run0 pacman -S poppler poppler-glib                                      # pdf rendering library
+run0 pacman -S firefox                                                   # browser
 
-run0 systemctl enable ly@tty2                   # greeter
-run0 systemctl enable --now bluetooth           # bluetooth
-run0 systemctl enable --now rtkit-daemon        # ses ve multimedya
-systemctl enable --now wireplumber --user       # ses ve multimedya
-systemctl enable --now pipewire --user          # ses ve multimedya
-systemctl enable --now pipewire-pulse --user    # ses ve multimedya
+# -----------------------------------------------------------------------
+# CONFIGURE GITHUB AND SSH
+mkdir ~/.ssh
+ssh-keygen -t ed25519 -C "your_email@example.com"
+   # > Generating public/private ALGORITHM key pair.
+   # > Enter a file in which to save the key (/home/YOU/.ssh/id_ALGORITHM):[Press enter]
+   # > Enter passphrase (empty for no passphrase): [Type a passphrase]
+   # > Enter same passphrase again: [Type passphrase again
+
+# Copy the following files from the repository:
+   # ~/.gitignore_global
+   # ~/.gitconfig
+   # ~/.ssh/config
+
+# Add your PUBLIC ssh key to github (authentication key and signing key)
+# Test SSH connection
+ssh -T git@github.com
+
+# -----------------------------------------------------------------------
+# GREETER
+run0 pacman -S ly
+run0 systemctl enable ly@tty2
+
+# -----------------------------------------------------------------------
+# BLUETOOTH
+run0 pacman -S bluez bluetui bluez-utils bluez-obex
+run0 systemctl enable --now bluetooth
+
+# -----------------------------------------------------------------------
+# SOUND and MEDIA
+run0 pacman -S rtkit wireplumber pipewire
+run0 pacman -S pipewire-alsa pipewire-jack pipewire-pulse pipewire-audio
+
+run0 systemctl enable --now rtkit-daemon
+systemctl enable --now wireplumber --user
+systemctl enable --now pipewire --user
+systemctl enable --now pipewire-pulse --user
+
+# -----------------------------------------------------------------------
+# ANIMATED SPLASH SCREEN
+run0 pacman -S plymouth
+
+# Download a theme you like from github: (I chose "LONE")
+# https://github.com/adi1090x/plymouth-themes/releases 
+# Then extract the archive content:
+tar -xzf <theme.tar.gz>
+run0 cp -R <theme_dir/> /usr/share/plymouth/themes/
+run0 plymouth-set-default-theme -l              # list available themes
+run0 plymouth-set-default-theme -R <theme_name> # set default theme by editing /etc/plymouth/plymouthd.conf file.
+
+# -----------------------------------------------------------------------
+# WIREGUARD CONFIGURATION
+run0 pacman -S wireguard-tools openvpn ufw
+systemctl enable --now ufw
+
+# Wireguard settings: assume you name the file as "linux-vpn.conf"
+wg-quick up /etc/wireguard/linux-vpn.conf
+systemctl enable wg-quick@linux-vpn.service
+systemctl start wg-quick@linux-vpn.service
+ufw route allow out on wlan0
+chown root:root /etc/wireguard/linux-vpn.conf
+chmod 0640 /etc/wireguard/linux-vpn.conf
 
 # -----------------------------------------------------------------------
 # MONITORING & DIAGNOSTIC TOOLS
 
 run0 pacman -S bottom                                                    # process viewer (alternative to "btop")
-run0 pacman -S atop                                                      # process viewer that also shows history
 run0 pacman -S iproute2 iputils inetutils ethtool dnsutils               # network tools
-run0 pacman -S nmap                                                      # port scan
-run0 pacman -S tcpdump                                                   # package capture
-run0 pacman -S iperf3                                                    # bandwidth test
 run0 pacman -S bind                                                      # tools like "dig, nslookup, nsupdate"
 run0 pacman -S util-linux                                                # tools like "lsblk, dmesg, umount"
 run0 pacman -S procps-ng                                                 # tools like "ps, top, free, vmstat"
@@ -379,14 +430,20 @@ run0 pacman -S kmod                                                      # tools
 run0 pacman -S pciutils                                                  # PCI/PCIe devices
 run0 pacman -S usbutils                                                  # USB devices
 run0 pacman -S efibootmgr                                                # UEFI boot
-run0 pacman -S strace                                                    # tracing
 run0 pacman -S e2fsprogs                                                 # ext4 filesystem tools
-run0 pacman -S dmidecode inxi hwinfo lshw                                # hardware info
+run0 pacman -S dmidecode inxi                                            # hardware info
 run0 pacman -S smartmontools                                             # disk health (smart info)
 run0 pacman -S lm_sensors                                                # sensor data
-run0 pacman -S iotop                                                     # I/O usage of processes
 run0 pacman -S nvme-cli                                                  # NVM-Express user space tooling
 run0 pacman -S powertop                                                  # Power consumption tool for analysis
+
+run0 pacman -S atop                                                      # process viewer that also shows history
+run0 pacman -S nmap                                                      # port scan
+run0 pacman -S tcpdump                                                   # package capture
+run0 pacman -S iperf3                                                    # bandwidth test
+run0 pacman -S strace                                                    # tracing
+run0 pacman -S hwinfo lshw                                               # hardware info
+run0 pacman -S iotop                                                     # I/O usage of processes
 run0 pacman -S perf                                                      # advanced diagnostic analysis kernel level
 
 # -----------------------------------------------------------------------
@@ -554,7 +611,7 @@ run0 pacman -S zig                              # safer alternative to C (still 
 
 run0 pacman -S clang gcc meson ninja            # meson: build tool (uses 'ninja', and 'wrapdb' for package management)
 run0 pacman -S cmake                            # cmake: build tool (you need extra package managers "conan" or "vcpkg")
-run0 pacman -S glaze                            # in memory json library for C++
+run0 pacman -S glaze                            # in memory json library for C++ (not needed for me)
 
 # "Dart" gets installed with Flutter SDK, no need for seperate installation.
 run0 pacman -S clang gcc ninja cmake pkgconf gtk3       # needed for flutter
@@ -572,33 +629,21 @@ flutter create --description "Description here" \
 
 run0 pacman -S crun podman podman-compose              # container tools (alternative to "docker")
                                                        
-
-# Install the packages you need.
-# wget   -> curl
-# cronie -> systemd timers
-pacman -S pacman-contrib plymouth
-
-# Download a theme you like from github:
-# https://github.com/adi1090x/plymouth-themes/releases 
-# Then extract the archive content:
-tar -xzf <theme.tar.gz>
-sudo cp -R <theme_dir/> /usr/share/plymouth/themes/
-sudo plymouth-set-default-theme -l              # list available themes
-sudo plymouth-set-default-theme -R <theme_name> # set default theme by editing /etc/plymouth/plymouthd.conf file.
-
 ------------------------------------------------------------------------
 
 (not installed =>  sof-firmware, alsa-firmware, sof-tools)
+# wget   -> curl
+# cronie -> systemd timers
+pacman -S pacman-contrib 
 
 run0 pacman -S exiv2                     # image metadata manipulation tool
-run0 pacman -S wireguard-tools openvpn   # needed for vpn connection
 
 run0 pacman -S hexyl  # command line hex viewer
 run0 pacman -S nushell  # alternative for `bash`
 run0 pacman -S gnome-calculator
 run0 pacman -S nfs-utils             # nfs for network file sharing
 run0 pacman -S samba                 # samba for network file sharing
-run0 pacman -S poppler poppler-glib  # pdf rendering library
+
 run0 pacman -S rsync    # sync between 2 machines
 run0 pacman -S rclone   # sync with cloud provider
 
@@ -607,7 +652,6 @@ run0 pacman -S imagemagick # chafa # imv? ueberzugpp?
 run0 pacman -S qemu-full # hardware acceleration for emulators
 # run0 pacman -S tectonic # required to render LaTeX math expressions
 # run0 pacman -S openslide
-# run0 pacman -S ufw # not needed since `iptables` already installed)
 
 # Terminal recording tool:
 # pacman -S asciinema
@@ -643,21 +687,8 @@ python -m venv venv
 source venv/bin/activate
 (venv) uv install debugpy
 
-# CONFIGURE GITHUB AND SSH
-mkdir ~/.ssh
-ssh-keygen -t ed25519 -C "your_email@example.com"
-  # > Generating public/private ALGORITHM key pair.
-  # > Enter a file in which to save the key (/home/YOU/.ssh/id_ALGORITHM):[Press enter]
-  # > Enter passphrase (empty for no passphrase): [Type a passphrase]
-  # > Enter same passphrase again: [Type passphrase again
 
-# Copy the following files from the repository:
-# ~/.gitignore_global
-# ~/.gitconfig
-# ~/.ssh/config
 
-# Add your PUBLIC ssh key to github (authentication key and signing key)
-ssh -T git@github.com # Test SSH connection
 
 # INSTALL HYPRLAND and WAYBAR
 run0 pacman -S qt5ct qt6c
@@ -686,20 +717,9 @@ pacman -Syy
 ```
 
 ```bash
-# WIREGUARD CONFIGURATION
-# Wireguard settings: assume you name the file as "linux-vpn.conf"
-wg-quick up /etc/wireguard/linux-vpn.conf
-systemctl enable wg-quick@linux-vpn.service
-systemctl start wg-quick@linux-vpn.service
-ufw route allow out on wlan0
-chown root:root /etc/wireguard/linux-vpn.conf
-chmod 0640 /etc/wireguard/linux-vpn.conf
-```
-
-```bash
 # INSTALL THE PACKAGES
 curl -O https://raw.githubusercontent.com/budidak/dotconfig/refs/heads/main/packages.txt  # Download the text file.
-pacman -S --needed - < packages.txt  # Install the packages from the text file.
+pacman -S --needed - < packages.txt                                                       # Install the packages from the text file.
 ```
 
 #### MOUNT YOUR ANDROID DEVICE THROUGH MTP
