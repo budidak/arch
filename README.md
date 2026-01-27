@@ -181,7 +181,7 @@ pacstrap -K /mnt base base-devel \
                  linux-firmware-amdgpu \
                  linux-firmware-nvidia \
                  linux-firmware-mediatek \
-                 polkit iwd neovim \
+                 polkit iwd neovim pacman-contrib \
                  --assume-installed=sudo
 
 # Generate a fstab file for the mounted filesystem.
@@ -355,6 +355,7 @@ run0 pacman -S tar cpio                                                  #
 run0 pacman -S gvfs gvfs-mtp gvfs-smb                                    # MTP tools (connect android to computer with USB or with network)
 run0 pacman -S poppler poppler-glib                                      # pdf rendering library
 run0 pacman -S firefox                                                   # browser
+run0 pacman -S ntfs-3g exfatprogs                                        # other filesystems
 
 # -----------------------------------------------------------------------
 # CONFIGURE GITHUB AND SSH
@@ -405,6 +406,20 @@ run0 pacman -S hyprland hypridle hyprlock hyprsunset hyprpaper hyprpolkitagent \
                hyprcursor hyprutils hyprpicker hyprland-protocols hyprpwcenter \
                xdg-desktop-portal-hyprland xdg-desktop-portal-gtk waybar \
                qt5-wayland qt6-wayland
+
+# -----------------------------------------------------------------------
+# THEMING
+
+ln -sf "${THEME_DIR}/gtk-4.0/assets" "${HOME}/.config/gtk-4.0/assets" &&
+ln -sf "${THEME_DIR}/gtk-4.0/gtk.css" "${HOME}/.config/gtk-4.0/gtk.css" &&
+ln -sf "${THEME_DIR}/gtk-4.0/gtk-dark.css" "${HOME}/.config/gtk-4.0/gtk-dark.css"
+
+ln -sf "${THEME_DIR}/gtk-3.0/assets" "${HOME}/.config/gtk-3.0/assets" &&
+ln -sf "${THEME_DIR}/gtk-3.0/gtk.css" "${HOME}/.config/gtk-3.0/gtk.css" &&
+ln -sf "${THEME_DIR}/gtk-3.0/gtk-dark.css" "${HOME}/.config/gtk-3.0/gtk-dark.css"
+
+bat cache --build
+fc-cache -f -v
 
 # -----------------------------------------------------------------------
 # LAZY VIM
@@ -687,7 +702,6 @@ run0 pacman -S crun podman podman-compose              # container tools (altern
 (not installed =>  sof-firmware, alsa-firmware, sof-tools)
 # wget   -> curl
 # cronie -> systemd timers
-pacman -S pacman-contrib 
 
 run0 pacman -S exiv2                     # image metadata manipulation tool
 
@@ -710,56 +724,13 @@ run0 pacman -S qemu-full # hardware acceleration for emulators
 asciinema record <name.cast>  # start recording (ends with ^D or exit command)
 asciinema play <name.cast>    # play a recording
 
-# THEMING
-ln -sf "${THEME_DIR}/gtk-4.0/assets" "${HOME}/.config/gtk-4.0/assets" &&
-ln -sf "${THEME_DIR}/gtk-4.0/gtk.css" "${HOME}/.config/gtk-4.0/gtk.css" &&
-ln -sf "${THEME_DIR}/gtk-4.0/gtk-dark.css" "${HOME}/.config/gtk-4.0/gtk-dark.css"
-
-ln -sf "${THEME_DIR}/gtk-3.0/assets" "${HOME}/.config/gtk-3.0/assets" &&
-ln -sf "${THEME_DIR}/gtk-3.0/gtk.css" "${HOME}/.config/gtk-3.0/gtk.css" &&
-ln -sf "${THEME_DIR}/gtk-3.0/gtk-dark.css" "${HOME}/.config/gtk-3.0/gtk-dark.css"
-
-bat cache --build
-fc-cache -f -v
-
-# INSTALL FILESYSTEMS
-run0 pacman -S ntfs-3g exfatprogs
-
 run0 pacman -S tree-sitter tree-sitter-bash tree-sitter-c tree-sitter-cli tree-sitter-bash tree-sitter-javascript tree-sitter-lua tree-sitter-markdown tree-sitter-python tree-sitter-query tree-sitter-rust tree-sitter-vim tree-sitter-vimdoc
-
 ```
 
 ```bash
 # INSTALL THE PACKAGES
 curl -O https://raw.githubusercontent.com/budidak/dotconfig/refs/heads/main/packages.txt  # Download the text file.
 pacman -S --needed - < packages.txt                                                       # Install the packages from the text file.
-```
-
-#### MOUNT YOUR ANDROID DEVICE THROUGH MTP
-
-The Media Transfer Protocol (MTP) is a protocol that enables us to transfer data between two devices. MTP is primarily used in devices running the Android operating system.
-
-```bash
-# `gvfs-mtp` package is needed to run `gio` command.
-
-lsusb | grep -i #<smartphone_etc...>
-# Bus 001 Device 006: ID 2717:ff48 Xiaomi Inc. Mi/Redmi series (MTP + ADB)
-
-# Alternatively, you can use `gio` to detect the device.
-gio mount -li | grep activation_root
-# activation_root=mtp://Xiaomi_Xiaomi_11T_Pro_44beaf3c/
-
-# MOUNT
-gio mount "mtp://Xiaomi_Xiaomi_11T_Pro_44beaf3c/"
-
-# Alternatively, MOUNT using [Bus,Device] numbers
-gio mount "mtp://[usb:001,006]/"
-
-# ACCESS MOUNTED DEVICES
-ls /run/user/1000/gvfs # 1000 for UID
-
-# UNMOUNT
-gio mount -u "mtp://Xiaomi_Xiaomi_11T_Pro_44beaf3c/"
 ```
 
 #### ANDROID SDK
@@ -820,3 +791,30 @@ NOTE: Make sure you enable the following options:
 
 - USB DEBUGGING
 - INSTALL VIA USB
+
+#### MOUNT YOUR ANDROID DEVICE THROUGH MTP
+
+The Media Transfer Protocol (MTP) is a protocol that enables us to transfer data between two devices. MTP is primarily used in devices running the Android operating system.
+
+```bash
+# `gvfs-mtp` package is needed to run `gio` command.
+
+lsusb | grep -i #<smartphone_etc...>
+# Bus 001 Device 006: ID 2717:ff48 Xiaomi Inc. Mi/Redmi series (MTP + ADB)
+
+# Alternatively, you can use `gio` to detect the device.
+gio mount -li | grep activation_root
+# activation_root=mtp://Xiaomi_Xiaomi_11T_Pro_44beaf3c/
+
+# MOUNT
+gio mount "mtp://Xiaomi_Xiaomi_11T_Pro_44beaf3c/"
+
+# Alternatively, MOUNT using [Bus,Device] numbers
+gio mount "mtp://[usb:001,006]/"
+
+# ACCESS MOUNTED DEVICES
+ls /run/user/1000/gvfs # 1000 for UID
+
+# UNMOUNT
+gio mount -u "mtp://Xiaomi_Xiaomi_11T_Pro_44beaf3c/"
+```
