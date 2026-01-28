@@ -1,0 +1,15 @@
+#!/bin/sh
+
+ADB="$HOME/android_sdk/platform-tools/adb"
+
+cleanup() {
+   kill -0 "$EMU_PID" 2>/dev/null || "$ADB" kill-server >/dev/null 2>&1
+}
+
+trap cleanup EXIT INT TERM
+
+nvidia-run emulator @Android_36 &
+
+EMU_PID=$!
+
+wait "$EMU_PID"
