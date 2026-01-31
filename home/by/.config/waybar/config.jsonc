@@ -3,7 +3,7 @@
    "position": "top",
    "mode": "dock",
    "margin": "4 8 0 8",
-   "spacing": 4,
+   "spacing": 3,
    "fixed-center": true,
    "reload_style_on_change": true,
    "modules-left": [
@@ -43,8 +43,8 @@
       "on-click-right": "maximize"
    },
    "mpris": {
-      "format": "<span color='lightgray' size='medium'>{player_icon}</span> <small>{dynamic}</small>",
-      "format-paused": "<span color='lightgray' size='medium'>{status_icon}</span> <small><i>{dynamic}</i></small>",
+      "format": "<span color='lightgray' size='medium'>{player_icon}</span><small> {dynamic}</small>",
+      "format-paused": "<span color='lightgray' size='medium'>{status_icon}</span><small><i> {dynamic}</i></small>",
       "player-icons": {
          "default": "&#xf04c;",
          "mpv": "&#xf87c;"
@@ -90,24 +90,26 @@
    },
    "bluetooth": {
       "format": "<span color='lightgray' size='large'>&#xf294;</span>  {status}",
-      "on-click": "rfkill list bluetooth | grep -q 'Soft blocked: yes' && rfkill unblock bluetooth || rfkill block bluetooth",
-      "on-click-right": "pkill bluetui | rfkill unblock bluetooth && hyprctl dispatch exec '[float; size 900 600; center] foot bluetui'",
+      "on-click": "pkill bluetui | rfkill unblock bluetooth && hyprctl dispatch exec '[float; size 900 600; center] foot bluetui'",
+      "on-click-right": "rfkill list bluetooth | grep -q 'Soft blocked: yes' && rfkill unblock bluetooth || rfkill block bluetooth",
       "on-click-middle": "pkill bluetui"
    },
    "network": {
       "interval": 10,
       "format": "<span color='lightgray' size='medium'>{icon}</span>    {essid}",
-      "format-disconnected": "<span color='lightgray' size='medium'>{icon}</span>   No Connection",
+      "format-disconnected": "<span color='lightgray' size='medium'>{icon}</span>    No Connection",
+      "format-disabled": "<span color='lightgray' size='medium'>{icon}</span>    disabled",
       "format-icons": {
          "wifi": "&#xf1eb;",
          "ethernet": "&#xf796;",
          "disconnected": "&#xf127;",
+         "disabled": "&#xf127;",
          "linked": "&#xf0c1;"
       },
-      "tooltip-format": "<span color='lightgray' size='medium'>&#xf109;</span>\t{ipaddr}\n<span color='lightgray' size='medium'>&#xf093;</span>\t{bandwidthUpBits}\t\t<span color='lightgray' size='medium'>&#xf019;</span>\t{bandwidthDownBits}",
-      "tooltip-format-disconnected": "",
-      "on-click": "rfkill list wifi | grep -q 'Soft blocked: yes' && rfkill unblock wifi || rfkill block wifi",
-      "on-click-right": "pkill impala | hyprctl dispatch exec '[float; size 1200 1000; center] foot impala'",
+      "tooltip-format": "<span color='lightgray' size='medium'>&#xf109;</span>\t{ipaddr}\n<span color='lightgray' size='medium'>&#xf1eb;</span>\t{signalStrength}%\n<span color='lightgray' size='medium'>&#xf019;</span>\t{bandwidthDownBits}\t\t<span color='lightgray' size='medium'>&#xf093;</span>\t{bandwidthUpBits}",
+      "tooltip-format-disconnected": "Disconnected",
+      "on-click": "pkill impala | hyprctl dispatch exec '[float; size 1200 1000; center] foot impala'",
+      "on-click-right": "rfkill list wifi | grep -q 'Soft blocked: yes' && rfkill unblock wifi || rfkill block wifi",
       "on-click-middle": "pkill impala"
    },
    "wireplumber": {
@@ -118,12 +120,12 @@
          "&#xf027; ",
          "&#xf028;  "
       ],
-     "on-scroll-up": "~/.config/waybar/scripts/sound.sh --up",
-     "on-scroll-down": "~/.config/waybar/scripts/sound.sh --down",
-     "on-click": "~/.config/waybar/scripts/sound.sh --toggle",
-     "on-click-right": "hyprctl dispatch exec '[float; size 900 600; center] hyprpwcenter'",
-     "on-click-middle": "pkill hyprpwcenter",
-     "tooltip-format": "Sound level"
+      "on-scroll-up": "sound --up",
+      "on-scroll-down": "sound --down",
+      "on-click": "sound --toggle",
+      "on-click-right": "hyprctl dispatch exec '[float; size 900 600; center] hyprpwcenter'",
+      "on-click-middle": "pkill hyprpwcenter",
+      "tooltip-format": "Sound level"
    },
    "backlight": {
       "format": "<span color='lightgray' size='medium'>{icon}</span>   {percent}%",
@@ -151,8 +153,8 @@
          "&#xf241;",
          "&#xf240;"
       ],
-      "format-charging": "<span color='lightgreen' size='medium'>&#xf1e6;</span>   {capacity}%",
-      "format-plugged": "<span color='lightgreen' size='medium'>&#xf1e6;</span>   {capacity}%",
+      "format-charging": "<span color='lightgreen' size='medium'>&#xf1e6;</span>    {capacity}%",
+      "format-plugged": "<span color='lightgreen' size='medium'>&#xf1e6;</span>    {capacity}%",
       "on-scroll-down": "",
       "on-scroll-up": ""
    },

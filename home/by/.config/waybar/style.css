@@ -149,6 +149,7 @@ tooltip label {
 
 #wireplumber.muted,
 #network.disconnected,
+#network.disabled,
 #bluetooth.disabled,
 #bluetooth.off {
    background: rgba(43, 48, 59, 0.5);
@@ -172,5 +173,5 @@ tooltip label {
 }
 
 #wireplumber.muted {
-   padding: 12px 16px 8px 16px;
+   padding: 12px 16px 13px 16px;
 }

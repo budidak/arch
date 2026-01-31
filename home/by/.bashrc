@@ -44,7 +44,6 @@ function diff() {
 
 ### ALIASES ###
 ###############
-# alias cat=bat
 alias cc="run0 sync; echo 3 | run0 tee /proc/sys/vm/drop_caches" # Clear buff/cache memory (You can check with free -h)
 alias clear="clear && printInfo"
 alias free="free -h"
@@ -59,17 +58,11 @@ alias v="nvim"
 alias watchBattery="run0 watch -n1 tlp-stat -b"
 alias watchCpu="watch -n 1 'cat /proc/cpuinfo | grep -i 'mhz''"
 alias watchGpu="watch -n 1 nvidia-smi"
-alias sleepTimeNvidia="cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_suspended_time"
-alias isActiveNvidia="cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status"
-
-alias nvidia-run='env __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json'
-# nvidia-run mpv --hwdec=nvdec <video_name>
-# nvidia-run vkcube
-# Fakat aşağıdakinde 4k video açayım prime offload yapılsın diye bekleyemezsin:
-# nvidia-run firefox
-
-# source /home/by/.config/broot/launcher/bash/br
+alias nvidiaSleepTime="cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_suspended_time"
+alias nvidiaStatus="cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status"
 
 ### EXECUTIONS ###
 ##################
 printInfo # Runs terminal greeter
+
+source /home/by/.config/broot/launcher/bash/br
