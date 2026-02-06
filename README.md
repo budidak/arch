@@ -323,6 +323,7 @@ run0 systemctl enable --now systemd-resolved                             # dns
 run0 systemctl enable --now iwd                                          # iwd daemon
 run0 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf       # needed for dns
 run0 systemctl enable --now systemd-homed                                # şifreli dizinler için
+run0 systemctl enable --now systemd-oomd                                 # out of memory daemon
 
 # -----------------------------------------------------------------------
 # APPS

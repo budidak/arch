@@ -484,7 +484,9 @@ node-gyp
 nodejs
 nodejs-nopt
 noto-fonts
+noto-fonts-cjk
 noto-fonts-emoji
+noto-fonts-extra
 npm
 npth
 nspr
@@ -580,6 +582,7 @@ rav1e
 rdma-core
 re2
 readline
+resvg
 rhash
 ripgrep
 rtkit
