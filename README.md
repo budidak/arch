@@ -181,6 +181,8 @@ pacstrap -K /mnt base base-devel \
                  linux-firmware-amdgpu \
                  linux-firmware-nvidia \
                  linux-firmware-mediatek \
+                 linux-firmware-realtek \
+                 linux-firmware-whence \
                  polkit iwd neovim pacman-contrib \
                  --assume-installed=sudo
 
@@ -717,7 +719,9 @@ run0 pacman -S tree-sitter \
                                                        
 ------------------------------------------------------------------------
 ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
-mikrofon çalışmıyorsa dene => sof-firmware --- alsa-firmware (eski kartlarda)
+alsa firmware
+sof-firmware
+
 # wget   -> curl
 # cronie -> systemd timers
 
