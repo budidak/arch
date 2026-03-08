@@ -387,7 +387,8 @@ ssh -T git@github.com
 # GREETER
 
 run0 pacman -S ly
-run0 systemctl enable ly@tty2
+run0 systemctl enable ly@tty1.service
+run0 systemctl disable getty@tty1.service
 
 # -----------------------------------------------------------------------
 # BLUETOOTH
