@@ -1,11 +1,19 @@
 [Match]
-Name=enp2s0
+Name=en*
 
 [Link]
 RequiredForOnline=routable
+MACAddressPolicy=random
 
 [Network]
 DHCP=yes
-DNS=9.9.9.9
-DNS=149.112.112.112
+DNS=9.9.9.9#dns.quad9.net
+DNS=149.112.112.112#dns.quad9.net
 Domains=~.
+IPv6PrivacyExtensions=yes
+
+[DHCPv4]
+Anonymize=yes
+
+[DHCPv6]
+Anonymize=yes
