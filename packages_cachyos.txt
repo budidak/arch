@@ -1,0 +1,26 @@
+INTERNET        --> iwd impala dnscrypt-proxy
+TERMINAL        --> foot tmux
+NOTIFICATION    --> fnott libnotify
+LAUNCHER        --> fuzzel
+STATUS BAR      --> waybar
+FILE MANAGER    --> yazi ttf-hack-nerd
+MEDIA CONTROL   --> pipewire wireplumber pipewire-alsa pipewire-pulse
+PROCESS VIEVER  --> btop
+BLUETOOTH       --> bluetui bluez-obex
+COMPOSITOR      --> mangowm
+BROWSER         --> helium-browser-bin
+DOCUMENTATION   --> typst
+VERSION CONTROL --> git
+POLKIT          --> polkit polkit-gnome
+RAM             --> zram-generator
+ROLLBACK        --> snapper snap-pac
+
+brightnessctl wlsunset
+fzf ripgrep fd
+alsa-firmware
+sof-firmware
+openssh
+less
+imagemagick
+ffmpeg
+eza bat jq poppler 7zip

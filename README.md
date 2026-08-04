@@ -571,9 +571,6 @@ How does it work?
 
 
 # DRIVERS needed for iGPU (amd radeon 780M)
-# linux-firmware-amdgpu       ✅ official kernel driver for modern amd gpus
-# amd-ucode                   ✅ microcode (for amd cpu)
-# mesa                        ✅ contains radeonsi + VA + VDPAU backends
 # vulkan-icd-loader           ✅ Ortak yükleyici zorunlu
 # vulkan-radeon               ✅ AMD vulkan sürücüsü (RADV)
 # glu                         ✅ AMD OpenGL sürücüsü
@@ -587,34 +584,12 @@ How does it work?
 # vulkan-tools                ✅ vulkaninfo
 # vulkan-mesa-implicit-layers ✅ gerekli (vulkan loader tarafından otomatik yüklenir)
 
-# DRIVERS needed for dGPU (nvidia rtx4070)
-# linux-firmware-nvidia       ✅ official kernel driver for nvidia
-# nvidia-open                 ✅ nvidia open source driver
-# nvidia-utils                ✅ nvidia utilities
-# nvidia-settings             ✅ nvidia settings
-# libva-nvidia-driver         ✅ hardware acceleration for nvidia
-# nvtop                       ✅ monitoring tool for nvidia 
-
-# Enable NVIDIA power services ONLY IF YOU USE IT AS PRIMARY GPU! ⚠️
-systemctl enable nvidia-suspend
-systemctl enable nvidia-hibernate
-systemctl enable nvidia-resume
-
 # linux-firmware-radeon   ❌ legacy amd gpus
 # mesa-amber              ❌ legacy OpenGL
 # libva-intel-driver      ❌ Intel only
 # libvdpau-va-gl          ❌ fallback/translation layer for old nvidia cards
 # vulkan-mesa-layers      ❌ for debugging
 # mangohud                ❌ for gaming
-
-# DISABLE NVIDIA and NOUVEAU discrete GPUs
-# 1. remove kernel parameters (create an efistub entry withoud nvidia parameters)
-# 2. remove nvidia related packages from system (linux-firmware-nvidia, libva-nvidia-driver nvidia-open nvidia-utils)
-# 3. blacklist nvidia and nouveau drivers in /etc/modprobe.d/blacklist-nvidia.conf = This blocks loading these modules.
-# 4. edit your /etc/mkinitcpio.conf file and remove nvidia related MODULES.
-# 5. regenerate "initramfs" file by running: mkinitcpio -P
-# 6. reboot the machine
-# 7. check the status of nvidia cards:
 
 # See the GPUs on the machine (even they are not loaded)
 lspci | grep -E "VGA|3D|Display" 
@@ -661,8 +636,6 @@ run0 pacman -S ast-grep                         # command search tool for code f
 run0 pacman -S sqlite postgresql                # database  --- sqlfluff (linter + formatter)
 
 run0 pacman -S nginx                            # server
-
-run0 pacman -S tmux                             # terminal multiplexer
 
 run0 pacman -S git lazygit                      # version control system & UI (alternative 'gitui')
 
