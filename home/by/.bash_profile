@@ -11,7 +11,7 @@ export BUN_INSTALL="$HOME/.bun"
 export CARGO_HOME=$HOME/.cargo
 export CARGO_TARGET_DIR=$CARGO_HOME/target
 export CGO_ENABLED=1
-export CHROME_EXECUTABLE=chromium
+export CHROME_EXECUTABLE=helium-browser
 export EDITOR=nvim
 export FLUTTER_HOME=$HOME/flutter
 export GOPATH=$HOME/go
@@ -47,3 +47,7 @@ export PATH="$PATH:$PYTHON_HOME/bin"       # packages installed with `pip` insid
 export PATH="$PATH":"$HOME/.pub-cache/bin" # firebase sdk (after installed FlutterFire CLI)
 
 source /home/by/.config/broot/launcher/bash/br
+
+if [[ -z $DISPLAY ]] && [[ $(tty) == /dev/tty1 ]]; then
+   exec mango
+fi

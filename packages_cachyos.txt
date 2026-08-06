@@ -15,6 +15,25 @@ POLKIT          --> polkit polkit-gnome
 RAM             --> zram-generator
 ROLLBACK        --> snapper snap-pac
 
+pacman -S systemd-boot-manager  --> kernel cmdline parameters güncellemek için.
+
+nvim /etc/sdboot-manage.conf
+run0 sdboot-manage-gen
+
+pacman -S bind               --> dig komutu için kurdum.
+pacman -S termshark          --> wireshark tui
+pacman -S spoof-dpi          --> dpi spoofing tool
+$ spoof-dpi -dns-addr 127.0.0.1 -dns-port 5353
+$ run0 termshark -i wlan0 
+
+
+pacman -S tealdeer           --> manpages faster
+pacman -S cachyos-settings   --> optimized settings
+pacman -S sbctl              --> secure boot tool
+pacman -S chwd
+run0 chwd -a                 --> auto install packages for drivers
+
+
 brightnessctl wlsunset
 fzf ripgrep fd
 alsa-firmware

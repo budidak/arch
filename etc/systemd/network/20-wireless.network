@@ -6,7 +6,7 @@ RequiredForOnline=routable
 
 [Network]
 DHCP=yes
-DNS=127.0.0.1:5353
+DNS=127.0.0.1:5353 [::1]:5353
 Domains=~.
 IPv6PrivacyExtensions=yes
 
